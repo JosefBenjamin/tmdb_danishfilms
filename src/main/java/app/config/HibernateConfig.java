@@ -48,6 +48,7 @@ public class HibernateConfig {
         configuration.addAnnotatedClass(app.entities.Director.class);
         configuration.addAnnotatedClass(app.entities.Movie.class);
         configuration.addAnnotatedClass(app.entities.Genre.class);
+        configuration.addAnnotatedClass(app.entities.BaseEntity.class);
 
     }
 

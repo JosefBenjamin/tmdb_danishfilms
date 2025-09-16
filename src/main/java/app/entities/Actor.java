@@ -12,11 +12,11 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Actor {
+public class Actor implements BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "actor_id")
-    private int id;
+    private Integer id;
 
     @Column(name = "actor_name", nullable = false, length = 255)
     private String name;
@@ -36,6 +36,17 @@ public class Actor {
     // Inverse side of Many-to-Many relationship with Movie
     @ManyToMany(mappedBy = "actors", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Movie> movies = new HashSet<>();
+
+    // Implementation of BaseEntity interface
+    @Override
+    public Integer getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     // Helper methods for bidirectional relationship management with Director
     public void addDirector(Director director) {

@@ -2,11 +2,10 @@ package app.DTO;
 
 import java.util.Set;
 
-public record ActorDTO(
-    Long id,
-    String name,
-    int age,
-    Set<Long> directorIds
+public record GenreDTO(
+    Integer id,
+    String genreName,
+    Set<Integer> movieIds
 ) implements DTO {
     @Override
     public Object getId() {
