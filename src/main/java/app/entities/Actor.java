@@ -4,14 +4,17 @@ import lombok.*;
 import jakarta.persistence.Entity;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Getter
 @NoArgsConstructor
+@RequiredArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "acotrs")
-public class Actor {
+public class Actor  implements app.DAO.DAO<Actor, Long> {
     @Column(name = "actor_name", nullable = false, length = 255)
     private String name;
 
@@ -37,5 +40,30 @@ public class Actor {
 
     public Long getId() {
         return id;
+    }
+
+    @Override
+    public Optional<Actor> findById(Long aLong) {
+        return Optional.empty();
+    }
+
+    @Override
+    public List<Actor> findAll() {
+        return List.of();
+    }
+
+    @Override
+    public Actor save(Actor entity) {
+        return null;
+    }
+
+    @Override
+    public Actor update(Actor entity) {
+        return null;
+    }
+
+    @Override
+    public void delete(Actor entity) {
+
     }
 }
