@@ -12,13 +12,38 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class DirectorService {
+public class DirectorService implements Service<DirectorDTO, Integer> {
 
     private final DirectorDAO directorDAO;
 
     public DirectorService() {
-        // Use HibernateConfig to get EntityManagerFactory
         this.directorDAO = new DirectorDAO(HibernateConfig.getEntityManagerFactory());
+    }
+
+    // Implementation of Service interface methods
+    @Override
+    public List<DirectorDTO> getAll() {
+        return getAllDirectors();
+    }
+
+    @Override
+    public DirectorDTO getById(Integer id) {
+        return getDirectorById(id);
+    }
+
+    @Override
+    public DirectorDTO save(DirectorDTO dto) {
+        return saveDirector(dto);
+    }
+
+    @Override
+    public DirectorDTO update(DirectorDTO dto) {
+        return updateDirector(dto);
+    }
+
+    @Override
+    public void delete(Integer id) {
+        deleteDirector(id);
     }
 
     /**
@@ -82,8 +107,7 @@ public class DirectorService {
 
         validateDirectorDTO(directorDTO);
 
-        // Check if director exists
-        if (!directorDAO.findById(directorDTO.id()).isPresent()) {
+        if (directorDAO.findById(directorDTO.id()).isEmpty()) {
             throw DirectorException.notFound(directorDTO.id());
         }
 
@@ -109,7 +133,6 @@ public class DirectorService {
         Director director = directorDAO.findById(id)
                 .orElseThrow(() -> DirectorException.notFound(id));
 
-        // Check if director has movies (optional business rule)
         if (!director.getMovies().isEmpty()) {
             throw new DirectorException(409, "Cannot delete director with ID " + id + " because they have directed movies");
         }
@@ -119,25 +142,6 @@ public class DirectorService {
         } catch (Exception e) {
             throw DirectorException.databaseError("delete director: " + e.getMessage());
         }
-    }
-
-    /**
-     * Gets all movies directed by a specific director
-     * @param directorId The director ID
-     * @return List of movie titles
-     * @throws DirectorException if director not found
-     */
-    public List<String> getMoviesByDirector(int directorId) {
-        Director director = directorDAO.findById(directorId)
-                .orElseThrow(() -> DirectorException.notFound(directorId));
-
-        if (director.getMovies().isEmpty()) {
-            throw DirectorException.noMoviesDirected(directorId);
-        }
-
-        return director.getMovies().stream()
-                .map(Movie::getTitle)
-                .collect(Collectors.toList());
     }
 
     /**
@@ -168,7 +172,6 @@ public class DirectorService {
         director.setId(directorDTO.id());
         director.setName(directorDTO.name());
         director.setAge(directorDTO.age());
-        // Note: Actors and Movies would need to be fetched and set separately if needed
         return director;
     }
 
@@ -188,16 +191,6 @@ public class DirectorService {
 
         if (directorDTO.age() < 0 || directorDTO.age() > 150) {
             throw DirectorException.invalidAge(directorDTO.age());
-        }
-    }
-
-    // Example usage method - can be removed in production
-    public void demonstrateUsage() {
-        List<DirectorDTO> allDirectors = getAllDirectors();
-        System.out.println("Found " + allDirectors.size() + " directors:");
-
-        for (DirectorDTO director : allDirectors) {
-            System.out.println("- " + director.name() + " (Age: " + director.age() + ")");
         }
     }
 }

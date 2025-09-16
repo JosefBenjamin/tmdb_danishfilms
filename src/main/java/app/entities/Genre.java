@@ -15,7 +15,7 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @Table(name = "genres")
-public class Genre {
+public class Genre implements BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +25,17 @@ public class Genre {
     // Inverse side of Many-to-Many relationship with Movie
     @ManyToMany(mappedBy = "genres", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Movie> movies = new HashSet<>();
+
+    // Implementation of BaseEntity interface
+    @Override
+    public Integer getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(Integer id) {
+        this.id = (Integer) id;
+    }
 
     // Helper methods for bidirectional relationship management with Movie
     public void addMovie(Movie movie) {

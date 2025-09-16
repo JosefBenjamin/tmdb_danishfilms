@@ -35,11 +35,19 @@ public class MovieException extends ApiException {
         return new MovieException(500, "Database error while performing movie " + operation);
     }
 
+    public static MovieException noDirectorAssigned(int movieId) {
+        return new MovieException(404, "No director assigned to movie with ID " + movieId);
+    }
+
     public static MovieException noActorsAssigned(int movieId) {
         return new MovieException(404, "No actors found for movie with ID " + movieId);
     }
 
-    public static MovieException noDirectorAssigned(int movieId) {
+    public static MovieException noDirectorAssigned(Integer movieId) {
         return new MovieException(404, "No director assigned to movie with ID " + movieId);
+    }
+
+    public static MovieException noActorsAssigned(Integer movieId) {
+        return new MovieException(404, "No actors found for movie with ID " + movieId);
     }
 }

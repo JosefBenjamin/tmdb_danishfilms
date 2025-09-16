@@ -14,11 +14,11 @@ import java.util.ArrayList;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Director {
+public class Director implements BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "director_id")
-    private int id;
+    private Integer id;
 
     @Column(name = "director_name", nullable = false, length = 255)
     private String name;
@@ -33,6 +33,17 @@ public class Director {
     // One-to-Many relationship with Movie (Director can direct multiple movies)
     @OneToMany(mappedBy = "director", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<Movie> movies = new ArrayList<>();
+
+    // Implementation of BaseEntity interface
+    @Override
+    public Integer getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     // Helper methods for bidirectional relationship management with Actor
     public void addActor(Actor actor) {
