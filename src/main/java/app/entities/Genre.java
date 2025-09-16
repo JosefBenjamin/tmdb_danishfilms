@@ -7,7 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Builder
@@ -24,5 +26,5 @@ public class Genre {
 
 
     @ManyToMany(mappedBy = "genres", cascade = {})
-    private List<Movie> movies = new ArrayList<>();
+    private Set<Movie> movies = new HashSet<>();
 }

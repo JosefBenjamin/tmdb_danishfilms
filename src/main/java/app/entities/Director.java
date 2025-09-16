@@ -3,10 +3,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import jakarta.persistence.Entity;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 
 @AllArgsConstructor
@@ -28,6 +25,9 @@ public class Director implements app.DAO.DAO<Director, Long> {
 
     @ManyToMany(mappedBy = "directors", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Actor> actors = new HashSet<>();
+
+    @OneToMany(mappedBy = "director")
+    private List<Movie> movies = new ArrayList<>();
 
     public void setId(Long id) {
         this.id = id;
