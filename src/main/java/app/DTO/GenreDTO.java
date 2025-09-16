@@ -8,7 +8,7 @@ public record GenreDTO(
     Set<Integer> movieIds
 ) implements DTO {
     @Override
-    public Object getId() {
+    public Integer getId() {
         return id;
     }
 }

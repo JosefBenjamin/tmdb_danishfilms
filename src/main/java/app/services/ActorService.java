@@ -107,7 +107,6 @@ public class ActorService implements Service<ActorDTO, Integer> {
 
         validateActorDTO(actorDTO);
 
-        // Check if actor exists - convert Long to Integer for DAO call
         if (actorDAO.findById(actorDTO.id().intValue()).isEmpty()) {
             throw ActorException.notFound(actorDTO.id().intValue());
         }
@@ -147,12 +146,12 @@ public class ActorService implements Service<ActorDTO, Integer> {
      * @return ActorDTO object
      */
     private ActorDTO convertToDTO(Actor actor) {
-        Set<Long> directorIds = actor.getDirectors().stream()
-                .map(director -> director.getId().longValue()) // Convert Integer to Long
+        Set<Integer> directorIds = actor.getDirectors().stream()
+                .map(director -> director.getId())
                 .collect(Collectors.toSet());
 
         return new ActorDTO(
-            actor.getId().longValue(), // Convert Integer to Long
+            actor.getId(),
             actor.getName(),
             actor.getAge(),
             directorIds
@@ -166,7 +165,7 @@ public class ActorService implements Service<ActorDTO, Integer> {
      */
     private Actor convertToEntity(ActorDTO actorDTO) {
         Actor actor = new Actor();
-        actor.setId(actorDTO.id() != null ? actorDTO.id().intValue() : null); // Convert Long to Integer
+        actor.setId(actorDTO.id() != null ? actorDTO.id().intValue() : null); 
         actor.setName(actorDTO.name());
         actor.setAge(actorDTO.age());
         // Note: Directors would need to be fetched and set separately if needed
