@@ -3,13 +3,13 @@ package app.DTO;
 import java.util.Set;
 
 public record ActorDTO(
-    Long id,
+    Integer id,
     String name,
     int age,
-    Set<Long> directorIds
+    Set<Integer> directorIds
 ) implements DTO {
     @Override
-    public Object getId() {
+    public Integer getId() {
         return id;
     }
 }

@@ -9,5 +9,5 @@ public interface DTO {
      * Gets the unique identifier for this DTO
      * @return the ID of the DTO
      */
-    Object getId();
+    Integer getId();
 }

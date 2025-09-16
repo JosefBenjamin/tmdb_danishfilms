@@ -9,7 +9,7 @@ public record DirectorDTO(
     Set<Integer> actorIds
 ) implements DTO {
     @Override
-    public Object getId() {
+    public Integer getId() {
         return id;
     }
 }
