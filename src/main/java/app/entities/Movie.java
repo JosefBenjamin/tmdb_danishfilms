@@ -23,7 +23,7 @@ public class Movie implements BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String title;
-    private LocalDate releaseYear;
+    private Integer releaseYear;
     private String originalLanguage;
 
     // Many-to-Many relationship with Genre (Movie can have multiple genres)
