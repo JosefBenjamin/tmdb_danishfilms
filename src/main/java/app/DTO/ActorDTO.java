@@ -3,8 +3,8 @@ package app.DTO;
 import java.util.Set;
 
 public record ActorDTO(
-    int id,
+    Integer id,
     String name,
-    int age,
-    Set<int> directorIds
+    Integer age,
+    Set<Integer> directorIds
 ) {}
