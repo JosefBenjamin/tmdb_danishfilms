@@ -279,7 +279,7 @@ public class MovieService implements Service<MovieDTO, Integer> {
         }
 
         if (movieDTO.releaseYear() != null) {
-            int year = movieDTO.releaseYear().getYear();
+            int year = movieDTO.releaseYear();
             if (year < 1888 || year > LocalDate.now().getYear() + 10) {
                 throw MovieException.invalidReleaseYear(year);
             }
@@ -293,7 +293,7 @@ public class MovieService implements Service<MovieDTO, Integer> {
 
         for (MovieDTO movie : allMovies) {
             System.out.println("- " + movie.title() + " (" +
-                (movie.releaseYear() != null ? movie.releaseYear().getYear() : "Unknown") + ")");
+                (movie.releaseYear() != null ? movie.releaseYear() : "Unknown") + ")");
         }
     }
 }

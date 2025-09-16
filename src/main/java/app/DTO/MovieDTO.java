@@ -6,7 +6,7 @@ import java.util.Set;
 public record MovieDTO(
     Integer id,
     String title,
-    LocalDate releaseYear,
+    Integer releaseYear,
     String originalLanguage,
     Set<Integer> genreIds,
     Set<Integer> actorIds,
