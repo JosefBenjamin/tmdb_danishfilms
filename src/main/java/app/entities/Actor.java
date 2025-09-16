@@ -1,31 +1,30 @@
 package app.entities;
+
 import jakarta.persistence.*;
 import lombok.*;
-import jakarta.persistence.Entity;
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
-@Getter
-@NoArgsConstructor
-@RequiredArgsConstructor
-@AllArgsConstructor
 @Entity
-@Table(name = "acotrs")
-public class Actor  implements app.DAO.DAO<Actor, Long> {
+@Table(name = "actors")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Actor {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "actor_id")
+    private Long id;
+
     @Column(name = "actor_name", nullable = false, length = 255)
     private String name;
 
     @Column(name = "actor_age", nullable = false)
     private int age;
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "actor_id")
-    @Id
-    private Long id;
-
+    // Owning side of the Many-to-Many relationship
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "actor_director",
@@ -34,36 +33,14 @@ public class Actor  implements app.DAO.DAO<Actor, Long> {
     )
     private Set<Director> directors = new HashSet<>();
 
-    public void setId(Long id) {
-        this.id = id;
+    // Helper methods for bidirectional relationship management
+    public void addDirector(Director director) {
+        this.directors.add(director);
+        director.getActors().add(this);
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    @Override
-    public Optional<Actor> findById(Long aLong) {
-        return Optional.empty();
-    }
-
-    @Override
-    public List<Actor> findAll() {
-        return List.of();
-    }
-
-    @Override
-    public Actor save(Actor entity) {
-        return null;
-    }
-
-    @Override
-    public Actor update(Actor entity) {
-        return null;
-    }
-
-    @Override
-    public void delete(Actor entity) {
-
+    public void removeDirector(Director director) {
+        this.directors.remove(director);
+        director.getActors().remove(this);
     }
 }
