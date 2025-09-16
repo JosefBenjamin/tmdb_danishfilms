@@ -1,65 +1,41 @@
 package app.entities;
+
 import jakarta.persistence.*;
 import lombok.*;
-import jakarta.persistence.Entity;
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
-
-@AllArgsConstructor
-@RequiredArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name = "directors")
-public class Director implements app.DAO.DAO<Director, Long> {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Director {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "director_id")
+    private Long id;
+
     @Column(name = "director_name", nullable = false, length = 255)
     private String name;
 
     @Column(name = "director_age", nullable = false)
     private int age;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "director_id")
-    private Long id;
-
+    // Inverse side of the Many-to-Many relationship
     @ManyToMany(mappedBy = "directors", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Actor> actors = new HashSet<>();
 
-    public void setId(Long id) {
-        this.id = id;
+    // Helper methods for bidirectional relationship management
+    public void addActor(Actor actor) {
+        this.actors.add(actor);
+        actor.getDirectors().add(this);
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    @Override
-    public Optional<Director> findById(Long aLong) {
-        return Optional.empty();
-    }
-
-    @Override
-    public List<Director> findAll() {
-        return List.of();
-    }
-
-    @Override
-    public Director save(Director entity) {
-        return null;
-    }
-
-    @Override
-    public Director update(Director entity) {
-        return null;
-    }
-
-    @Override
-    public void delete(Director entity) {
-
+    public void removeActor(Actor actor) {
+        this.actors.remove(actor);
+        actor.getDirectors().remove(this);
     }
 }
-
