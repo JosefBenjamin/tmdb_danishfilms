@@ -7,7 +7,7 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-public class ActorDAO implements DAO<Actor, Long> {
+public class ActorDAO implements DAO<Actor, Integer> {
 
     private final EntityManagerFactory emf;
 
@@ -16,7 +16,7 @@ public class ActorDAO implements DAO<Actor, Long> {
     }
 
     @Override
-    public Optional<Actor> findById(Long id) {
+    public Optional<Actor> findById(Integer id) {
         try (EntityManager em = emf.createEntityManager()) {
             Actor actor = em.find(Actor.class, id);
             return Optional.ofNullable(actor);

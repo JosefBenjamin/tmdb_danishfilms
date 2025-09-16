@@ -8,9 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -28,25 +26,59 @@ public class Movie {
     private LocalDate releaseYear;
     private String originalLanguage;
 
-    @ManyToMany( cascade = {})
+    // Many-to-Many relationship with Genre (Movie can have multiple genres)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "movies_and_genres",
-    joinColumns = @JoinColumn(name = "movie_id"),
-    inverseJoinColumns = @JoinColumn(name = "genre_id"))
+        joinColumns = @JoinColumn(name = "movie_id"),
+        inverseJoinColumns = @JoinColumn(name = "genre_id"))
     private Set<Genre> genres = new HashSet<>();
 
-    @ManyToMany( cascade = {})
+    // Many-to-Many relationship with Actor (Movie can have multiple actors)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "movies_and_actors",
             joinColumns = @JoinColumn(name = "movie_id"),
             inverseJoinColumns = @JoinColumn(name = "actor_id"))
     private Set<Actor> actors = new HashSet<>();
 
-
-    @ManyToOne
+    // Many-to-One relationship with Director (Movie has one director)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "director_id")
     private Director director;
 
+    // Helper methods for bidirectional relationship management with Genre
+    public void addGenre(Genre genre) {
+        this.genres.add(genre);
+        genre.getMovies().add(this);
+    }
 
+    public void removeGenre(Genre genre) {
+        this.genres.remove(genre);
+        genre.getMovies().remove(this);
+    }
 
+    // Helper methods for bidirectional relationship management with Actor
+    public void addActor(Actor actor) {
+        this.actors.add(actor);
+        actor.getMovies().add(this);
+    }
 
+    public void removeActor(Actor actor) {
+        this.actors.remove(actor);
+        actor.getMovies().remove(this);
+    }
 
+    // Helper methods for bidirectional relationship management with Director
+    public void setDirector(Director director) {
+        // Remove from previous director if exists
+        if (this.director != null) {
+            this.director.getMovies().remove(this);
+        }
+
+        this.director = director;
+
+        // Add to new director if not null
+        if (director != null) {
+            director.getMovies().add(this);
+        }
+    }
 }

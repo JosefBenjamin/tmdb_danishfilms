@@ -6,9 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -24,7 +22,18 @@ public class Genre {
     private int id;
     private String genreName;
 
-
-    @ManyToMany(mappedBy = "genres", cascade = {})
+    // Inverse side of Many-to-Many relationship with Movie
+    @ManyToMany(mappedBy = "genres", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Movie> movies = new HashSet<>();
+
+    // Helper methods for bidirectional relationship management with Movie
+    public void addMovie(Movie movie) {
+        this.movies.add(movie);
+        movie.getGenres().add(this);
+    }
+
+    public void removeMovie(Movie movie) {
+        this.movies.remove(movie);
+        movie.getGenres().remove(this);
+    }
 }

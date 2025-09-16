@@ -7,7 +7,7 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-public class DirectorDAO implements DAO<Director, Long> {
+public class DirectorDAO implements DAO<Director, Integer> {
 
     private final EntityManagerFactory emf;
 
@@ -16,7 +16,7 @@ public class DirectorDAO implements DAO<Director, Long> {
     }
 
     @Override
-    public Optional<Director> findById(Long id) {
+    public Optional<Director> findById(Integer id) {
         try (EntityManager em = emf.createEntityManager()) {
             Director director = em.find(Director.class, id);
             return Optional.ofNullable(director);

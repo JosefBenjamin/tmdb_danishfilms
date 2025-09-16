@@ -3,8 +3,8 @@ package app.DTO;
 import java.util.Set;
 
 public record DirectorDTO(
-    Long id,
+    int id,
     String name,
     int age,
-    Set<Long> actorIds
+    Set<int> actorIds
 ) {}
