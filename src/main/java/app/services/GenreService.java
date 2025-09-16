@@ -4,7 +4,6 @@ import app.DAO.GenreDAO;
 import app.DTO.GenreDTO;
 import app.entities.Genre;
 import app.entities.Movie;
-import app.exceptions.GenreException;
 import app.config.HibernateConfig;
 
 import java.util.List;
@@ -68,7 +67,7 @@ public class GenreService implements Service<GenreDTO, Integer> {
 
     /**
      * Saves a new genre
-     * @param genreDTO The genre data to save
+     * @param genreDTO The genre data to persist
      * @return Saved GenreDTO
      * @throws GenreException for validation or database errors
      */
@@ -83,15 +82,15 @@ public class GenreService implements Service<GenreDTO, Integer> {
         } catch (GenreException e) {
             throw e;
         } catch (Exception e) {
-            // Continue with save if error is just that genre doesn't exist
+            // Continue with persist if error is just that genre doesn't exist
         }
         
         try {
             Genre genre = convertToEntity(genreDTO);
-            Genre savedGenre = genreDAO.save(genre);
+            Genre savedGenre = genreDAO.persist(genre);
             return convertToDTO(savedGenre);
         } catch (Exception e) {
-            throw GenreException.databaseError("save genre: " + e.getMessage());
+            throw GenreException.databaseError("persist genre: " + e.getMessage());
         }
     }
 

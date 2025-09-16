@@ -4,8 +4,6 @@ import app.DAO.DirectorDAO;
 import app.DTO.DirectorDTO;
 import app.entities.Director;
 import app.entities.Actor;
-import app.entities.Movie;
-import app.exceptions.DirectorException;
 import app.config.HibernateConfig;
 
 import java.util.List;
@@ -78,7 +76,7 @@ public class DirectorService implements Service<DirectorDTO, Integer> {
 
     /**
      * Saves a new director
-     * @param directorDTO The director data to save
+     * @param directorDTO The director data to persist
      * @return Saved DirectorDTO
      * @throws DirectorException for validation or database errors
      */
@@ -87,10 +85,10 @@ public class DirectorService implements Service<DirectorDTO, Integer> {
 
         try {
             Director director = convertToEntity(directorDTO);
-            Director savedDirector = directorDAO.save(director);
+            Director savedDirector = directorDAO.persist(director);
             return convertToDTO(savedDirector);
         } catch (Exception e) {
-            throw DirectorException.databaseError("save director: " + e.getMessage());
+            throw DirectorException.databaseError("persist director: " + e.getMessage());
         }
     }
 

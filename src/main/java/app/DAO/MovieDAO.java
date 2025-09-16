@@ -7,7 +7,7 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-public class MovieDAO implements DAO<Movie, Integer> {
+public class MovieDAO implements IDAO<Movie, Integer> {
 
     private final EntityManagerFactory emf;
 
@@ -32,7 +32,7 @@ public class MovieDAO implements DAO<Movie, Integer> {
     }
 
     @Override
-    public Movie save(Movie entity) {
+    public Movie persist(Movie entity) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {

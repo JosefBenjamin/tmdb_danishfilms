@@ -3,8 +3,6 @@ package app.services;
 import app.DAO.ActorDAO;
 import app.DTO.ActorDTO;
 import app.entities.Actor;
-import app.entities.Director;
-import app.exceptions.ActorException;
 import app.config.HibernateConfig;
 
 import java.util.List;
@@ -78,7 +76,7 @@ public class ActorService implements Service<ActorDTO, Integer> {
 
     /**
      * Saves a new actor
-     * @param actorDTO The actor data to save
+     * @param actorDTO The actor data to persist
      * @return Saved ActorDTO
      * @throws ActorException for validation or database errors
      */
@@ -87,10 +85,10 @@ public class ActorService implements Service<ActorDTO, Integer> {
 
         try {
             Actor actor = convertToEntity(actorDTO);
-            Actor savedActor = actorDAO.save(actor);
+            Actor savedActor = actorDAO.persist(actor);
             return convertToDTO(savedActor);
         } catch (Exception e) {
-            throw ActorException.databaseError("save actor: " + e.getMessage());
+            throw ActorException.databaseError("persist actor: " + e.getMessage());
         }
     }
 

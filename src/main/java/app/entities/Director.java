@@ -2,68 +2,64 @@ package app.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
 
 @Entity
-@Table(name = "directors")
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true) //only uses id for equality
+@ToString(exclude = {"actors", "movies"}) // avoids recursion
 public class Director implements BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "director_id")
+    @EqualsAndHashCode.Include  // only id is used
     private Integer id;
 
-    @Column(name = "director_name", nullable = false, length = 255)
     private String name;
-
-    @Column(name = "director_age", nullable = false)
     private int age;
 
-    // Inverse side of the Many-to-Many relationship with Actor
-    @ManyToMany(mappedBy = "directors", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(mappedBy = "directors")
+    @Builder.Default
     private Set<Actor> actors = new HashSet<>();
 
-    // One-to-Many relationship with Movie (Director can direct multiple movies)
-    @OneToMany(mappedBy = "director", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
-    private List<Movie> movies = new ArrayList<>();
 
-    // Implementation of BaseEntity interface
-    @Override
-    public Integer getId() {
-        return id;
+    @OneToMany(mappedBy = "director")
+    @Builder.Default
+    private Set<Movie> movies = new HashSet<>();
+
+    // ---- bidirectional helpers ----
+    public boolean addActor(Actor actor) {
+        if (actor == null) return false;
+        boolean a = actors.add(actor);
+        boolean b = actor.getDirectors().add(this);
+        return a || b;
     }
 
-    @Override
-    public void setId(Integer id) {
-        this.id = id;
+    public boolean removeActor(Actor actor) {
+        if (actor == null) return false;
+        boolean a = actors.remove(actor);
+        boolean b = actor.getDirectors().remove(this);
+        return a || b;
     }
 
-    // Helper methods for bidirectional relationship management with Actor
-    public void addActor(Actor actor) {
-        this.actors.add(actor);
-        actor.getDirectors().add(this);
-    }
-
-    public void removeActor(Actor actor) {
-        this.actors.remove(actor);
-        actor.getDirectors().remove(this);
-    }
-
-    // Helper methods for bidirectional relationship management with Movie
     public void addMovie(Movie movie) {
-        this.movies.add(movie);
-        movie.setDirector(this);
+        if (movie == null || movie.getDirector() == this) return;
+        movie.setDirector(this);               // owning side is Movie.director
+        if (!movies.contains(movie)) movies.add(movie);
     }
 
     public void removeMovie(Movie movie) {
-        this.movies.remove(movie);
-        movie.setDirector(null);
+        if (movie == null) return;
+        if (movies.remove(movie) && movie.getDirector() == this) {
+            movie.setDirector(null);
+        }
     }
+
 }
+

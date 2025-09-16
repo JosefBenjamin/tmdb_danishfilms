@@ -19,11 +19,12 @@ public class Genre implements BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
     private String genreName;
 
     // Inverse side of Many-to-Many relationship with Movie
     @ManyToMany(mappedBy = "genres", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @Builder.Default
     private Set<Movie> movies = new HashSet<>();
 
     // Implementation of BaseEntity interface

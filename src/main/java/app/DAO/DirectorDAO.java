@@ -7,7 +7,7 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-public class DirectorDAO implements DAO<Director, Integer> {
+public class DirectorDAO implements IDAO<Director, Integer> {
 
     private final EntityManagerFactory emf;
 
@@ -32,7 +32,7 @@ public class DirectorDAO implements DAO<Director, Integer> {
     }
 
     @Override
-    public Director save(Director entity) {
+    public Director persist(Director entity) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {

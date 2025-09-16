@@ -6,7 +6,6 @@ import app.entities.Movie;
 import app.entities.Actor;
 import app.entities.Director;
 import app.entities.Genre;
-import app.exceptions.MovieException;
 import app.config.HibernateConfig;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -85,7 +84,7 @@ public class MovieService implements Service<MovieDTO, Integer> {
 
     /**
      * Saves a new movie
-     * @param movieDTO The movie data to save
+     * @param movieDTO The movie data to persist
      * @return Saved MovieDTO
      * @throws MovieException for validation or database errors
      */
@@ -94,10 +93,10 @@ public class MovieService implements Service<MovieDTO, Integer> {
 
         try {
             Movie movie = convertToEntity(movieDTO);
-            Movie savedMovie = movieDAO.save(movie);
+            Movie savedMovie = movieDAO.persist(movie);
             return convertToDTO(savedMovie);
         } catch (Exception e) {
-            throw MovieException.databaseError("save movie: " + e.getMessage());
+            throw MovieException.databaseError("persist movie: " + e.getMessage());
         }
     }
 
