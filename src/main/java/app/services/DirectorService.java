@@ -41,7 +41,7 @@ public class DirectorService {
      * @return DirectorDTO object
      * @throws DirectorException if director not found
      */
-    public DirectorDTO getDirectorById(int id) {
+    public DirectorDTO getDirectorById(Integer id) {
         if (id == null || id <= 0) {
             throw DirectorException.invalidName("Director ID cannot be null or negative");
         }
@@ -101,7 +101,7 @@ public class DirectorService {
      * @param id The director ID to delete
      * @throws DirectorException if director not found or has associated movies
      */
-    public void deleteDirector(int id) {
+    public void deleteDirector(Integer id) {
         if (id == null || id <= 0) {
             throw DirectorException.invalidName("Director ID cannot be null or negative");
         }
@@ -146,7 +146,7 @@ public class DirectorService {
      * @return DirectorDTO object
      */
     private DirectorDTO convertToDTO(Director director) {
-        Set<int> actorIds = director.getActors().stream()
+        Set<Integer> actorIds = director.getActors().stream()
                 .map(Actor::getId)
                 .collect(Collectors.toSet());
 
