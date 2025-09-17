@@ -1,11 +1,20 @@
 package app.services;
 import java.util.*;
 import app.DAO.*;
+import app.exceptions.ApiException;
 import app.services.*;
 import app.DTO.*;
 import app.entities.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 
-public abstract class AbstractService<DTO, Entity> {
+
+public abstract class AbstractService<DTO, Entity, ID> {
+    private final EntityManagerFactory emf;
+
+    public AbstractService(EntityManagerFactory emf) {
+        this.emf = emf;
+    }
 
     public BaseEntity convertToEntity(DTO dto){
         BaseEntity result = null;
@@ -70,5 +79,81 @@ public abstract class AbstractService<DTO, Entity> {
                  return result;
 
         } else return result;
+    }
+
+    public  BaseEntity saveEntity(Entity entity) {
+        BaseEntity result = null;
+        try {
+            if (entity.getClass() == Actor.class){
+                try (EntityManager em = emf.createEntityManager()) {
+                    em.getTransaction().begin();
+                    try {
+                        em.persist(entity);
+                        em.getTransaction().commit();
+                        result = new Actor().builder()
+                                            .id(((Actor) entity).getId())
+                                            .name(((Actor) entity).getName())
+                                            .build();
+                        return result;
+                    } catch (Exception e) {
+                        em.getTransaction().rollback();
+                        throw e;
+                    }
+                }
+
+            } else if (entity.getClass() == Director.class){
+                try (EntityManager em = emf.createEntityManager()) {
+                    em.getTransaction().begin();
+                    try {
+                        em.persist(entity);
+                        em.getTransaction().commit();
+                        result = new Director().builder().id(((Director) entity).getId())
+                                                .name(((Director) entity).getName())
+                                                .build();
+                        return result;
+                    } catch (Exception e) {
+                        em.getTransaction().rollback();
+                        throw e;
+                    }
+                }
+
+            } else if (entity.getClass() == Movie.class){
+                try (EntityManager em = emf.createEntityManager()) {
+                    em.getTransaction().begin();
+                    try {
+                        em.persist(entity);
+                        em.getTransaction().commit();
+                        result = new Movie().builder().id(((Movie) entity).getId())
+                                                .title(((Movie) entity).getTitle())
+                                                .releaseYear(((Movie) entity).getReleaseYear())
+                                                .originalLanguage(((Movie) entity).getOriginalLanguage())
+                                                .build();
+                        return result;
+                    } catch (Exception e) {
+                        em.getTransaction().rollback();
+                        throw e;
+                    }
+                }
+
+            } else if (entity.getClass() == Genre.class){
+                try (EntityManager em = emf.createEntityManager()) {
+                    em.getTransaction().begin();
+                    try {
+                        em.persist(entity);
+                        em.getTransaction().commit();
+                        result = new Genre().builder().id(((Genre) entity).getId())
+                                                .genreName(((Genre) entity).getGenreName())
+                                                .build();
+                        return result;
+                    } catch (Exception e) {
+                        em.getTransaction().rollback();
+                        throw e;
+                    }
+                }
+            } else
+            return null;
+        } catch (Exception e) {
+            throw ApiException.serverError("Could not save entity: " + e.getMessage());
+        }
     }
 }

@@ -10,7 +10,6 @@ import app.config.HibernateConfig;
 import app.exceptions.ApiException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
