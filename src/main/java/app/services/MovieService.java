@@ -27,9 +27,8 @@ public class MovieService extends AbstractService<MovieDTO, Movie> {
         this.movieDAO = new MovieDAO(emf);
     }
 
-    // Implementation of Service interface methods
-    public List<Movie> getAll() {
-        return findAll(Movie.class);
+    public Optional<Movie> findById(Integer id){
+        return findById(id, Movie.class);
     }
 
     public Optional<Movie> getById(Integer id) {

@@ -97,10 +97,7 @@ public class ActorService extends AbstractService<ActorDTO, Actor> {
 
 
     public Optional<Actor> findById(Integer id){
-        if (id == null || id <= 0) {
-            throw apiExc.badRequest("Actor ID cannot be null or negative");
-        }
-        return actorDAO.findById(id);
+        return findById(id, Actor.class);
     }
 
 

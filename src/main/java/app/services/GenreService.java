@@ -2,6 +2,7 @@ package app.services;
 
 import app.DAO.GenreDAO;
 import app.DTO.GenreDTO;
+import app.entities.Actor;
 import app.entities.Genre;
 import app.entities.Movie;
 import app.config.HibernateConfig;
@@ -9,6 +10,7 @@ import app.exceptions.ApiException;
 import jakarta.persistence.EntityManagerFactory;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,12 +30,8 @@ public class GenreService extends AbstractService<GenreDTO, Genre> {
      * Finds all genres in the database and converts to DTOs
      * @return List of GenreDTO objects
      */
-    public List<Genre> findAll() {
-        try {
-            return findAll(Genre.class);
-        } catch (Exception e) {
-            throw apiExc.serverError("Cannot retrieve all genres: " + e.getMessage());
-        }
+    public Optional<Genre> findById(Integer id){
+        return findById(id, Genre.class);
     }
 
     /**
