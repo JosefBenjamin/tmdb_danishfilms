@@ -26,6 +26,7 @@ public class Director extends BaseEntity {
     private String name;
     private int age;
 
+    private String job;
     @ManyToMany(mappedBy = "directors")
     @Builder.Default
     private Set<Actor> actors = new HashSet<>();

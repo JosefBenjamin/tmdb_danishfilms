@@ -2,6 +2,8 @@ package app.services;
 
 import app.DAO.ActorDAO;
 import app.DTO.ActorDTO;
+import app.DTO.PersonDTO;
+import app.DTO.ResponseDTO;
 import app.entities.Actor;
 import app.config.HibernateConfig;
 import app.enums.ErrorType;
@@ -12,13 +14,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ActorService implements Service<ActorDTO, Integer> {
-
+public class ActorService extends AbstractService<ActorDTO, Actor, Integer> implements Service<ActorDTO, Integer> {
     private final ActorDAO actorDAO;
     ApiException apiExc;
 
     public ActorService() {
         // Use HibernateConfig to get EntityManagerFactory
         this.actorDAO = new ActorDAO(HibernateConfig.getEntityManagerFactory());
+        super(HibernateConfig.getEntityManagerFactory());
     }
 
     // Implementation of Service interface methods
@@ -196,4 +199,5 @@ public class ActorService implements Service<ActorDTO, Integer> {
         }
     }
 }
+
 
