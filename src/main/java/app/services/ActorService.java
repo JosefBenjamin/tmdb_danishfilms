@@ -154,10 +154,7 @@ public class ActorService implements Service<ActorDTO, Integer> {
                 .map(director -> director.getId())
                 .collect(Collectors.toSet());
 
-        return new ActorDTO(
-            actor.getId(),
-            actor.getName()
-        );
+        return null;
     }
 
     /**

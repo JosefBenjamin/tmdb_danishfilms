@@ -31,6 +31,5 @@ public abstract class AbstractService<DTO> {
                                         .build();
             return result;
         } else return result;
-
     }
 }
