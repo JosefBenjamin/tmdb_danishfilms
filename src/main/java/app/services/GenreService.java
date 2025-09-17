@@ -2,235 +2,136 @@ package app.services;
 
 import app.DAO.GenreDAO;
 import app.DTO.GenreDTO;
-import app.entities.Actor;
 import app.entities.Genre;
-import app.entities.Movie;
-import app.config.HibernateConfig;
 import app.exceptions.ApiException;
 import jakarta.persistence.EntityManagerFactory;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-public class GenreService extends AbstractService<GenreDTO, Genre> {
+/**
+ * GenreService - Clean, minimal implementation using generic AbstractService
+ */
+public class GenreService extends AbstractService<GenreDTO, Genre, Integer> {
 
     private final GenreDAO genreDAO;
 
-    ApiException apiExc;
-
     public GenreService(EntityManagerFactory emf) {
-        // Use HibernateConfig to get EntityManagerFactory
-        super(emf);
-        this.genreDAO = new GenreDAO(HibernateConfig.getEntityManagerFactory());
+        super(emf, new GenreDAO(emf));
+        this.genreDAO = (GenreDAO) dao; // Cast for additional methods
     }
 
-    /**
-     * Finds all genres in the database and converts to DTOs
-     * @return List of GenreDTO objects
-     */
-    public Optional<Genre> findById(Integer id){
-        return findById(id, Genre.class);
-    }
+    // ===========================================
+    // CONVERSION METHODS - Only thing we need to implement!
+    // ===========================================
 
-    /**
-     * Finds genre by ID and converts to DTO
-     * @param id The genre ID
-     * @return GenreDTO object
-     */
-    public GenreDTO getGenreById(Integer id) {
-        if (id == null || id <= 0) {
-            throw apiExc.badRequest("Genre ID cannot be null or negative");
-        }
-        
-        return genreDAO.findById(id)
-                .map(this::convertToDTO)
-                .orElseThrow(() -> apiExc.notFound("Cannot find genre with ID: " + id));
-    }
-
-    /**
-     * Finds genre by name
-     * @param genreName The genre name to search for
-     * @return GenreDTO object
-     */
-    public GenreDTO getGenreByName(String genreName) {
-        if (genreName == null || genreName.trim().isEmpty()) {
-            throw apiExc.badRequest(genreName);
-        }
-        
-        return genreDAO.findByGenreName(genreName)
-                .map(this::convertToDTO)
-                .orElseThrow(() -> apiExc.notFound("Cannot find genre with the name: " + genreName));
-    }
-
-    /**
-     * Saves a new genre
-     * @param genreDTO The genre data to persist
-     * @return Saved GenreDTO
-     */
-    public GenreDTO saveGenre(GenreDTO genreDTO) {
-        validateGenreDTO(genreDTO);
-        
-        // Check if genre with same name already exists
-        try {
-            genreDAO.findByGenreName(genreDTO.genreName()).ifPresent(existingGenre -> {
-                throw apiExc.alreadyExists("This genre already exists: " + genreDTO.genreName());
-            });
-        } catch (RuntimeException e) {
-            throw e;
-        }
-        
-        try {
-            Genre genre = convertToEntity(genreDTO);
-            Genre savedGenre = genreDAO.persist(genre);
-            return convertToDTO(savedGenre);
-        } catch (RuntimeException e) {
-            throw apiExc.serverError("Could not persist genre: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Updates an existing genre
-     * @param genreDTO The genre data to update
-     * @return Updated GenreDTO
-//     */
-//    public GenreDTO updateGenre(GenreDTO genreDTO) {
-//        if (genreDTO.id() == null) {
-//            throw apiExc.badRequest("Genre ID is required for update");
-//        }
-//
-//        validateGenreDTO(genreDTO);
-//
-//        // Check if genre exists
-//        if (!genreDAO.findById(genreDTO.id()).isPresent()) {
-//            throw apiExc.notFound("Could not find genre with the ID: " + genreDTO.id());
-//        }
-//
-//        try {
-//            Genre genre = convertToEntity(genreDTO);
-//            Genre updatedGenre = genreDAO.update(genre);
-//            return convertToDTO(updatedGenre);
-//        } catch (RuntimeException e) {
-//            throw apiExc.serverError("update genre: " + e.getMessage());
-//        }
-//    }
-
-    /**
-     * Deletes a genre by ID
-     * @param id The genre ID to delete
-     */
-    public void deleteGenre(Integer id) {
-        if (id == null || id <= 0) {
-            throw apiExc.badRequest("Genre ID cannot be null or negative");
-        }
-        
-        Genre genre = genreDAO.findById(id)
-                .orElseThrow(() -> apiExc.notFound("Could not find genre by ID: " + id));
-        
-        // Check if genre has associated movies (business rule)
-        if (!genre.getMovies().isEmpty()) {
-            throw apiExc.conflict("could not delete genre because the genre has movies" + id);
-        }
-        
-        try {
-            genreDAO.delete(genre);
-        } catch (Exception e) {
-            throw apiExc.serverError("Could not delete genre: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Searches genres by partial name match
-     * @param genreName The partial genre name to search for
-     * @return List of matching GenreDTO objects
-     */
-    public List<GenreDTO> searchGenresByName(String genreName) {
-        if (genreName == null || genreName.trim().isEmpty()) {
-            throw apiExc.badRequest("Genre name cannot be null or empty" + genreName);
-        }
-        
-        try {
-            return genreDAO.findByGenreNameContaining(genreName).stream()
-                    .map(this::convertToDTO)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw apiExc.serverError("could not retrieve genres by name search " + e.getMessage());
-        }
-    }
-
-    /**
-     * Gets all movies for a specific genre
-     * @param genreId The genre ID
-     * @return List of movie titles
-     */
-    public List<String> getMoviesByGenre(Integer genreId) {
-        Genre genre = genreDAO.findById(genreId)
-                .orElseThrow(() -> apiExc.notFound("Could not find movies with genre ID: " + genreId));
-
-        return genre.getMovies().stream()
-                .map(Movie::getTitle)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Converts Genre entity to GenreDTO
-     * @param genre The Genre entity
-     * @return GenreDTO object
-     */
-    public GenreDTO convertToDTO(Genre genre) {
-        Set<Integer> movieIds = genre.getMovies().stream()
-                .map(Movie::getId)
-                .collect(Collectors.toSet());
-
+    @Override
+    protected GenreDTO convertToDTO(Genre genre) {
         return new GenreDTO(
             genre.getId(),
             genre.getGenreName()
         );
     }
 
-    /**
-     * Converts GenreDTO to Genre entity
-     * @param genreDTO The GenreDTO
-     * @return Genre entity
-     */
-    public Genre convertToEntity(GenreDTO genreDTO) {
-           Genre genre = new Genre();
-           genre.setId(genreDTO.id());
-           genre.setGenreName(genreDTO.genreName());
-        return genre;
-        // Note: Movies would need to be fetched and set separately if needed
+    @Override
+    protected Genre convertToEntity(GenreDTO dto) {
+        return Genre.builder()
+            .id(dto.getId())
+            .genreName(dto.genreName())
+            .build();
     }
 
-    /**
-     * Validates GenreDTO data
-     * @param genreDTO The GenreDTO to validate
-     */
-    private void validateGenreDTO(GenreDTO genreDTO) {
-        if (genreDTO == null) {
-            throw apiExc.badRequest("Genre data cannot be null");
-        }
+    @Override
+    protected void validateDTO(GenreDTO dto) {
+        super.validateDTO(dto);
 
-        if (genreDTO.genreName() == null || genreDTO.genreName().trim().isEmpty()) {
-            throw apiExc.badRequest("genre data cannot be null or empty " + genreDTO.genreName());
+        if (dto.genreName() == null || dto.genreName().trim().isEmpty()) {
+            throw ApiException.badRequest("Genre name cannot be null or empty");
         }
     }
 
+    // ===========================================
+    // BUSINESS-SPECIFIC METHODS
+    // ===========================================
 
-    public GenreDTO getById(Integer id) {
-        return getGenreById(id);
+    /**
+     * Find genre by name
+     */
+    public GenreDTO findByName(String genreName) {
+        if (genreName == null || genreName.trim().isEmpty()) {
+            throw ApiException.badRequest("Genre name cannot be null or empty");
+        }
+        
+        return genreDAO.findByGenreName(genreName)
+            .map(this::convertToDTO)
+            .orElseThrow(() -> ApiException.notFound("Genre not found with name: " + genreName));
     }
 
-    public GenreDTO save(GenreDTO dto) {
-        return saveGenre(dto);
+    /**
+     * Search genres by partial name match
+     */
+    public List<GenreDTO> searchByName(String genreName) {
+        if (genreName == null || genreName.trim().isEmpty()) {
+            throw ApiException.badRequest("Genre name cannot be null or empty");
+        }
+        
+        try {
+            return genreDAO.findByGenreNameContaining(genreName).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw ApiException.serverError("Failed to search genres by name: " + e.getMessage());
+        }
     }
 
-    public Genre update(Genre entity) {
-        return (Genre) updateEntity(entity);
+    /**
+     * Get all movies for a specific genre
+     */
+    public List<String> getMoviesByGenre(Integer genreId) {
+        Genre genre = dao.findById(genreId)
+            .orElseThrow(() -> ApiException.notFound("Genre not found with ID: " + genreId));
+
+        return genre.getMovies().stream()
+            .map(movie -> movie.getTitle())
+            .collect(Collectors.toList());
     }
 
+    /**
+     * Custom delete with business rules
+     */
+    @Override
     public void delete(Integer id) {
-        deleteGenre(id);
+        if (id == null) {
+            throw ApiException.badRequest("ID cannot be null");
+        }
+
+        Genre genre = dao.findById(id)
+            .orElseThrow(() -> ApiException.notFound("Genre not found with ID: " + id));
+
+        // Business rule: Cannot delete genre with movies
+        if (!genre.getMovies().isEmpty()) {
+            throw ApiException.conflict("Cannot delete genre with ID " + id + " because it has associated movies");
+        }
+
+        try {
+            dao.delete(genre);
+        } catch (Exception e) {
+            throw ApiException.serverError("Failed to delete genre with ID " + id + ": " + e.getMessage());
+        }
     }
 
+    /**
+     * Custom save with business rules
+     */
+    @Override
+    public GenreDTO save(GenreDTO dto) {
+        validateDTO(dto);
+
+        // Check if genre with same name already exists
+        if (genreDAO.findByGenreName(dto.genreName()).isPresent()) {
+            throw ApiException.conflict("Genre already exists with name: " + dto.genreName());
+        }
+
+        return super.save(dto);
+    }
 }
