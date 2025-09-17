@@ -53,7 +53,5 @@ public class ApiException extends RuntimeException {
         return new ApiException(ErrorType.SERVER_ERROR, ErrorType.SERVER_ERROR.getErrorMessage() + "\n" + msg);
     }
 
-
-
 }
 

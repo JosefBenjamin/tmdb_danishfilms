@@ -113,7 +113,7 @@ public class ActorService implements Service<ActorDTO, Integer> {
         }
         validateActorDTO(actorDTO);
         if (actorDAO.findById(actorDTO.id().intValue()).isEmpty()) {
-            throw apiExc.notFound("Actor not found with ID: " + actorDTO.id());
+            throw apiExc.notFound("Actor not found with ID: /n" + actorDTO.id());
         }
 
         try {
@@ -121,7 +121,7 @@ public class ActorService implements Service<ActorDTO, Integer> {
             Actor updatedActor = actorDAO.update(actor);
             return convertToDTO(updatedActor);
         } catch (Exception e) {
-            throw apiExc.
+            throw apiExc.serverError("update actor: /n" + e.getMessage());
         }
     }
 
