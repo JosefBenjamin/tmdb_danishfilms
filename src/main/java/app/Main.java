@@ -18,6 +18,7 @@ public class Main {
         // Test full CRUD operations
         System.out.println("\n=== Testing ActorService CRUD Operations ===");
 
+
         // Save using service
         ActorDTO newActorDTO = new ActorDTO(null, "Jane Smith", "Acting");
         ActorDTO savedDTO = actorService.save(newActorDTO);
