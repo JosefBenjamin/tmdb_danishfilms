@@ -5,6 +5,7 @@ import app.DTO.DirectorDTO;
 import app.entities.Director;
 import app.entities.Actor;
 import app.config.HibernateConfig;
+import app.exceptions.ApiException;
 
 import java.util.List;
 import java.util.Set;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 public class DirectorService implements Service<DirectorDTO, Integer> {
 
     private final DirectorDAO directorDAO;
+    ApiException apiExc = new ApiException();
 
     public DirectorService() {
         this.directorDAO = new DirectorDAO(HibernateConfig.getEntityManagerFactory());
