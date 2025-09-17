@@ -11,5 +11,4 @@ public record ResponseDTO(
     @JsonProperty("results") List<MovieDTO> results,
     @JsonProperty("total_pages") Integer totalPages,
     @JsonProperty("total_results") Integer totalResults
-) implements DTO {
-}
+) {}

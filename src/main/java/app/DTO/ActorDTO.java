@@ -15,12 +15,7 @@ public record ActorDTO(
     @JsonProperty("character")
     String job
 
-) implements DTO {
-    @Override
-    public Integer getId() {
-        return id;
-    }
-
+) {}
     /*
           "adult": false,
       "gender": 2,
@@ -35,4 +30,4 @@ public record ActorDTO(
       "credit_id": "68bcc72c39edc42a531bc44a",
       "order": 0
      */
-}
+

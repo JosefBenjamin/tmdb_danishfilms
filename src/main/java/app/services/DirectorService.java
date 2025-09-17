@@ -45,8 +45,8 @@ public class DirectorService extends AbstractService<DirectorDTO, Director> {
         return (Director) updateEntity(entity);
     }
 
-    public void delete(Integer id) {
-        deleteDirector(id);
+    public void delete(Director entity) {
+        delete(entity);
     }
 
     public List<Director> findAll() {

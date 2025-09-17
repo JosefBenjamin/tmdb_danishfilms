@@ -13,10 +13,4 @@ public record PersonDTO(
     @JsonProperty("place_of_birth") String placeOfBirth,
     @JsonProperty("profile_path") String profilePath,
     @JsonProperty("known_for_department") String knownForDepartment
-) implements DTO {
-
-    @Override
-    public Integer getId() {
-        return id;
-    }
-}
+) {}
