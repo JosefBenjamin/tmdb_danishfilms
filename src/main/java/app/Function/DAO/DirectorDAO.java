@@ -1,38 +1,38 @@
-package app.DAO;
+package app.Function.DAO;
 
-import app.entities.Actor;
+import app.Object.entities.DirectorEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-public class ActorDAO implements IDAO<Actor, Integer> {
+public class DirectorDAO implements IDAO<DirectorEntity, Integer> {
 
     private final EntityManagerFactory emf;
 
-    public ActorDAO(EntityManagerFactory emf) {
+    public DirectorDAO(EntityManagerFactory emf) {
         this.emf = emf;
     }
 
     @Override
-    public Optional<Actor> findById(Integer id) {
+    public Optional<DirectorEntity> findById(Integer id) {
         try (EntityManager em = emf.createEntityManager()) {
-            Actor actor = em.find(Actor.class, id);
-            return Optional.ofNullable(actor);
+            DirectorEntity directorEntity = em.find(DirectorEntity.class, id);
+            return Optional.ofNullable(directorEntity);
         }
     }
 
     @Override
-    public List<Actor> findAll() {
+    public List<DirectorEntity> findAll() {
         try (EntityManager em = emf.createEntityManager()) {
-            TypedQuery<Actor> query = em.createQuery("SELECT a FROM Actor a", Actor.class);
+            TypedQuery<DirectorEntity> query = em.createQuery("SELECT d FROM DirectorEntity d", DirectorEntity.class);
             return query.getResultList();
         }
     }
 
     @Override
-    public Actor persist(Actor entity) {
+    public DirectorEntity persist(DirectorEntity entity) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {
@@ -47,11 +47,11 @@ public class ActorDAO implements IDAO<Actor, Integer> {
     }
 
     @Override
-    public Actor update(Actor entity) {
+    public DirectorEntity update(DirectorEntity entity) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {
-                Actor updated = em.merge(entity);
+                DirectorEntity updated = em.merge(entity);
                 em.getTransaction().commit();
                 return updated;
             } catch (Exception e) {
@@ -62,13 +62,13 @@ public class ActorDAO implements IDAO<Actor, Integer> {
     }
 
     @Override
-    public void delete(Actor entity) {
+    public void delete(DirectorEntity entity) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {
-                Actor managedActor = em.find(Actor.class, entity.getId());
-                if (managedActor != null) {
-                    em.remove(managedActor);
+                DirectorEntity managedDirectorEntity = em.find(DirectorEntity.class, entity.getId());
+                if (managedDirectorEntity != null) {
+                    em.remove(managedDirectorEntity);
                 }
                 em.getTransaction().commit();
             } catch (Exception e) {

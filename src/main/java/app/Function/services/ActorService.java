@@ -1,11 +1,10 @@
-package app.services;
+package app.Function.services;
 
-import app.DAO.ActorDAO;
-import app.DTO.ActorDTO;
-import app.DTO.PersonDTO;
-import app.DTO.ResponseDTO;
-import app.entities.Actor;
-import app.config.HibernateConfig;
+import app.Function.DAO.ActorDAO;
+import app.Object.DTO.ActorDTO;
+import app.Object.DTO.PersonDTO;
+import app.Object.DTO.ResponseDTO;
+import app.Object.entities.ActorEntity;
 import app.exceptions.ApiException;
 import jakarta.persistence.EntityManagerFactory;
 
@@ -16,7 +15,7 @@ import java.util.stream.Collectors;
 /**
  * ActorService - Clean, minimal implementation using generic AbstractService
  */
-public class ActorService extends AbstractService<ActorDTO, Actor, Integer> {
+public class ActorService extends AbstractService<ActorDTO, ActorEntity, Integer> {
 
     public ActorService(EntityManagerFactory emf) {
         super(emf, new ActorDAO(emf));
@@ -27,17 +26,17 @@ public class ActorService extends AbstractService<ActorDTO, Actor, Integer> {
     // ===========================================
 
     @Override
-    public ActorDTO convertToDTO(Actor actor) {
+    public ActorDTO convertToDTO(ActorEntity actorEntity) {
         return new ActorDTO(
-            actor.getId(),
-            actor.getName(),
+            actorEntity.getId(),
+            actorEntity.getName(),
             "Acting"
         );
     }
 
     @Override
-    public Actor convertToEntity(ActorDTO dto) {
-        return Actor.builder()
+    public ActorEntity convertToEntity(ActorDTO dto) {
+        return ActorEntity.builder()
             .id(dto.getId())
             .name(dto.name())
             .age(0) // Default age or get from DTO if available

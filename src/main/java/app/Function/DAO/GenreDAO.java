@@ -1,13 +1,13 @@
-package app.DAO;
+package app.Function.DAO;
 
-import app.entities.Genre;
+import app.Object.entities.GenreEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-public class GenreDAO implements IDAO<Genre, Integer> {
+public class GenreDAO implements IDAO<GenreEntity, Integer> {
 
     private final EntityManagerFactory emf;
 
@@ -16,23 +16,23 @@ public class GenreDAO implements IDAO<Genre, Integer> {
     }
 
     @Override
-    public Optional<Genre> findById(Integer id) {
+    public Optional<GenreEntity> findById(Integer id) {
         try (EntityManager em = emf.createEntityManager()) {
-            Genre genre = em.find(Genre.class, id);
-            return Optional.ofNullable(genre);
+            GenreEntity genreEntity = em.find(GenreEntity.class, id);
+            return Optional.ofNullable(genreEntity);
         }
     }
 
     @Override
-    public List<Genre> findAll() {
+    public List<GenreEntity> findAll() {
         try (EntityManager em = emf.createEntityManager()) {
-            TypedQuery<Genre> query = em.createQuery("SELECT g FROM Genre g", Genre.class);
+            TypedQuery<GenreEntity> query = em.createQuery("SELECT g FROM GenreEntity g", GenreEntity.class);
             return query.getResultList();
         }
     }
 
     @Override
-    public Genre persist(Genre entity) {
+    public GenreEntity persist(GenreEntity entity) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {
@@ -47,11 +47,11 @@ public class GenreDAO implements IDAO<Genre, Integer> {
     }
 
     @Override
-    public Genre update(Genre entity) {
+    public GenreEntity update(GenreEntity entity) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {
-                Genre updated = em.merge(entity);
+                GenreEntity updated = em.merge(entity);
                 em.getTransaction().commit();
                 return updated;
             } catch (Exception e) {
@@ -62,13 +62,13 @@ public class GenreDAO implements IDAO<Genre, Integer> {
     }
 
     @Override
-    public void delete(Genre entity) {
+    public void delete(GenreEntity entity) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {
-                Genre managedGenre = em.find(Genre.class, entity.getId());
-                if (managedGenre != null) {
-                    em.remove(managedGenre);
+                GenreEntity managedGenreEntity = em.find(GenreEntity.class, entity.getId());
+                if (managedGenreEntity != null) {
+                    em.remove(managedGenreEntity);
                 }
                 em.getTransaction().commit();
             } catch (Exception e) {
@@ -79,19 +79,19 @@ public class GenreDAO implements IDAO<Genre, Integer> {
     }
 
     // Additional query methods
-    public Optional<Genre> findByGenreName(String genreName) {
+    public Optional<GenreEntity> findByGenreName(String genreName) {
         try (EntityManager em = emf.createEntityManager()) {
-            TypedQuery<Genre> query = em.createQuery(
-                "SELECT g FROM Genre g WHERE g.genreName = :genreName", Genre.class);
+            TypedQuery<GenreEntity> query = em.createQuery(
+                "SELECT g FROM GenreEntity g WHERE g.genreName = :genreName", GenreEntity.class);
             query.setParameter("genreName", genreName);
             return query.getResultList().stream().findFirst();
         }
     }
 
-    public List<Genre> findByGenreNameContaining(String genreName) {
+    public List<GenreEntity> findByGenreNameContaining(String genreName) {
         try (EntityManager em = emf.createEntityManager()) {
-            TypedQuery<Genre> query = em.createQuery(
-                "SELECT g FROM Genre g WHERE g.genreName LIKE :genreName", Genre.class);
+            TypedQuery<GenreEntity> query = em.createQuery(
+                "SELECT g FROM GenreEntity g WHERE g.genreName LIKE :genreName", GenreEntity.class);
             query.setParameter("genreName", "%" + genreName + "%");
             return query.getResultList();
         }

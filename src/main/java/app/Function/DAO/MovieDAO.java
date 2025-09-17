@@ -1,14 +1,13 @@
-package app.DAO;
+package app.Function.DAO;
 
-import app.DTO.MovieDTO;
-import app.entities.Movie;
+import app.Object.entities.MovieEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-public class MovieDAO implements IDAO<Movie, Integer> {
+public class MovieDAO implements IDAO<MovieEntity, Integer> {
 
     private final EntityManagerFactory emf;
 
@@ -17,22 +16,22 @@ public class MovieDAO implements IDAO<Movie, Integer> {
     }
 
     @Override
-    public Optional<Movie> findById(Integer id) {
+    public Optional<MovieEntity> findById(Integer id) {
         try (EntityManager em = emf.createEntityManager()) {
-            Movie movie = em.find(Movie.class, id);
-            return Optional.ofNullable(movie);
+            MovieEntity movieEntity = em.find(MovieEntity.class, id);
+            return Optional.ofNullable(movieEntity);
         }
     }
 
     @Override
-    public List<Movie> findAll() {
+    public List<MovieEntity> findAll() {
         try (EntityManager em = emf.createEntityManager()) {
-            TypedQuery<Movie> query = em.createQuery("SELECT m FROM Movie m", Movie.class);
+            TypedQuery<MovieEntity> query = em.createQuery("SELECT m FROM MovieEntity m", MovieEntity.class);
             return query.getResultList();
         }
     }
 
-    public Movie persist(Movie entity) {
+    public MovieEntity persist(MovieEntity entity) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {
@@ -46,11 +45,11 @@ public class MovieDAO implements IDAO<Movie, Integer> {
         }
     }
 
-    public Movie update(Movie entity) {
+    public MovieEntity update(MovieEntity entity) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {
-                Movie updated = em.merge(entity);
+                MovieEntity updated = em.merge(entity);
                 em.getTransaction().commit();
                 return updated;
             } catch (Exception e) {
@@ -60,13 +59,13 @@ public class MovieDAO implements IDAO<Movie, Integer> {
         }
     }
 
-    public void delete(Movie entity) {
+    public void delete(MovieEntity entity) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {
-                Movie managedMovie = em.find(Movie.class, entity.getId());
-                if (managedMovie != null) {
-                    em.remove(managedMovie);
+                MovieEntity managedMovieEntity = em.find(MovieEntity.class, entity.getId());
+                if (managedMovieEntity != null) {
+                    em.remove(managedMovieEntity);
                 }
                 em.getTransaction().commit();
             } catch (Exception e) {
@@ -77,19 +76,19 @@ public class MovieDAO implements IDAO<Movie, Integer> {
     }
 
     // Additional query methods
-    public List<Movie> findByTitle(String title) {
+    public List<MovieEntity> findByTitle(String title) {
         try (EntityManager em = emf.createEntityManager()) {
-            TypedQuery<Movie> query = em.createQuery(
-                "SELECT m FROM Movie m WHERE m.title LIKE :title", Movie.class);
+            TypedQuery<MovieEntity> query = em.createQuery(
+                "SELECT m FROM MovieEntity m WHERE m.title LIKE :title", MovieEntity.class);
             query.setParameter("title", "%" + title + "%");
             return query.getResultList();
         }
     }
 
-    public List<Movie> findByDirectorId(Integer directorId) {
+    public List<MovieEntity> findByDirectorId(Integer directorId) {
         try (EntityManager em = emf.createEntityManager()) {
-            TypedQuery<Movie> query = em.createQuery(
-                "SELECT m FROM Movie m WHERE m.director.id = :directorId", Movie.class);
+            TypedQuery<MovieEntity> query = em.createQuery(
+                "SELECT m FROM MovieEntity m WHERE m.directorEntity = :directorId", MovieEntity.class);
             query.setParameter("directorId", directorId);
             return query.getResultList();
         }

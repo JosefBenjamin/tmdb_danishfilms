@@ -1,9 +1,10 @@
-package app.services;
+package app.Function.services;
 
-import app.DAO.MovieDAO;
-import app.DTO.MovieDTO;
-import app.DTO.ResponseDTO;
-import app.entities.*;
+import app.Function.DAO.MovieDAO;
+import app.Object.DTO.MovieDTO;
+import app.Object.DTO.ResponseDTO;
+import app.Object.entities.GenreEntity;
+import app.Object.entities.MovieEntity;
 import app.exceptions.ApiException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -14,7 +15,7 @@ import java.util.stream.Collectors;
 /**
  * MovieService - Clean, minimal implementation using generic AbstractService
  */
-public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
+public class MovieService extends AbstractService<MovieDTO, MovieEntity, Integer> {
 
     private final MovieDAO movieDAO;
 
@@ -28,24 +29,24 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
     // ===========================================
 
     @Override
-    protected MovieDTO convertToDTO(Movie movie) {
-        Set<Integer> genreIds = movie.getGenres().stream()
-                .map(Genre::getId)
+    protected MovieDTO convertToDTO(MovieEntity movieEntity) {
+        Set<Integer> genreIds = movieEntity.getGenreEntities().stream()
+                .map(GenreEntity::getId)
                 .collect(Collectors.toSet());
 
         return new MovieDTO(
-            movie.getId(),
-            movie.getTitle(),
-            movie.getReleaseYear(),
-            movie.getOriginalLanguage(),
+            movieEntity.getId(),
+            movieEntity.getTitle(),
+            movieEntity.getReleaseYear(),
+            movieEntity.getOriginalLanguage(),
             genreIds
         );
     }
 
     @Override
-    protected Movie convertToEntity(MovieDTO dto) {
+    protected MovieEntity convertToEntity(MovieDTO dto) {
         try (EntityManager em = emf.createEntityManager()) {
-            Movie movie = Movie.builder()
+            MovieEntity movieEntity = MovieEntity.builder()
                 .id(dto.getId())
                 .title(dto.title())
                 .releaseYear(dto.releaseYear())
@@ -54,18 +55,18 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
 
             // Fetch and set genres if provided
             if (dto.genreIds() != null && !dto.genreIds().isEmpty()) {
-                Set<Genre> genres = new HashSet<>();
+                Set<GenreEntity> genreEntities = new HashSet<>();
                 for (Integer genreId : dto.genreIds()) {
-                    Genre genre = em.find(Genre.class, genreId);
-                    if (genre == null) {
+                    GenreEntity genreEntity = em.find(GenreEntity.class, genreId);
+                    if (genreEntity == null) {
                         throw ApiException.notFound("Genre with id " + genreId + " not found");
                     }
-                    genres.add(genre);
+                    genreEntities.add(genreEntity);
                 }
-                movie.setGenres(genres);
+                movieEntity.setGenreEntities(genreEntities);
             }
 
-            return movie;
+            return movieEntity;
         } catch (RuntimeException e) {
             throw ApiException.serverError("Failed to convert DTO to entity: " + e.getMessage());
         }

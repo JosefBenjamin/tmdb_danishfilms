@@ -1,15 +1,15 @@
-package app.services;
+package app.Function.services;
 
-import app.DAO.DirectorDAO;
-import app.DTO.DirectorDTO;
-import app.entities.Director;
+import app.Function.DAO.DirectorDAO;
+import app.Object.DTO.DirectorDTO;
+import app.Object.entities.DirectorEntity;
 import app.exceptions.ApiException;
 import jakarta.persistence.EntityManagerFactory;
 
 /**
  * DirectorService - Clean, minimal implementation using generic AbstractService
  */
-public class DirectorService extends AbstractService<DirectorDTO, Director, Integer> {
+public class DirectorService extends AbstractService<DirectorDTO, DirectorEntity, Integer> {
 
     public DirectorService(EntityManagerFactory emf) {
         super(emf, new DirectorDAO(emf));
@@ -20,17 +20,17 @@ public class DirectorService extends AbstractService<DirectorDTO, Director, Inte
     // ===========================================
 
     @Override
-    protected DirectorDTO convertToDTO(Director director) {
+    protected DirectorDTO convertToDTO(DirectorEntity directorEntity) {
         return new DirectorDTO(
-            director.getId(),
-            director.getName(),
-            director.getJob() != null ? director.getJob() : "Directing"
+            directorEntity.getId(),
+            directorEntity.getName(),
+            directorEntity.getJob() != null ? directorEntity.getJob() : "Directing"
         );
     }
 
     @Override
-    protected Director convertToEntity(DirectorDTO dto) {
-        return Director.builder()
+    protected DirectorEntity convertToEntity(DirectorDTO dto) {
+        return DirectorEntity.builder()
             .id(dto.getId())
             .name(dto.name())
             .job(dto.job())
@@ -60,16 +60,16 @@ public class DirectorService extends AbstractService<DirectorDTO, Director, Inte
             throw ApiException.badRequest("ID cannot be null");
         }
 
-        Director director = dao.findById(id)
+        DirectorEntity directorEntity = dao.findById(id)
             .orElseThrow(() -> ApiException.notFound("Director not found with ID: " + id));
 
         // Business rule: Cannot delete director with movies
-        if (!director.getMovies().isEmpty()) {
+        if (!directorEntity.getMovieEntities().isEmpty()) {
             throw ApiException.conflict("Cannot delete director with ID " + id + " because they have directed movies");
         }
 
         try {
-            dao.delete(director);
+            dao.delete(directorEntity);
         } catch (Exception e) {
             throw ApiException.serverError("Failed to delete director with ID " + id + ": " + e.getMessage());
         }

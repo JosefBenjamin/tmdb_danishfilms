@@ -1,13 +1,16 @@
-package app.DTO;
+package app.Object.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record GenreDTO(
+public record ActorDTO(
     @JsonProperty("id")
     Integer id,
 
     @JsonProperty("name")
-    String genreName
+    String name,
+
+    @JsonProperty("character")
+    String job
 ) implements BaseDTO<Integer> {
 
     @Override

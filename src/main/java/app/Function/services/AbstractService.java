@@ -1,8 +1,8 @@
-package app.services;
+package app.Function.services;
 
-import app.DAO.IDAO;
-import app.DTO.BaseDTO;
-import app.entities.BaseEntity;
+import app.Function.DAO.IDAO;
+import app.Object.DTO.BaseDTO;
+import app.Object.entities.BaseEntity;
 import app.exceptions.ApiException;
 import jakarta.persistence.EntityManagerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;

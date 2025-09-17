@@ -1,8 +1,8 @@
-package app.services;
+package app.Function.services;
 
-import app.DAO.GenreDAO;
-import app.DTO.GenreDTO;
-import app.entities.Genre;
+import app.Function.DAO.GenreDAO;
+import app.Object.DTO.GenreDTO;
+import app.Object.entities.GenreEntity;
 import app.exceptions.ApiException;
 import jakarta.persistence.EntityManagerFactory;
 
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 /**
  * GenreService - Clean, minimal implementation using generic AbstractService
  */
-public class GenreService extends AbstractService<GenreDTO, Genre, Integer> {
+public class GenreService extends AbstractService<GenreDTO, GenreEntity, Integer> {
 
     private final GenreDAO genreDAO;
 
@@ -26,16 +26,16 @@ public class GenreService extends AbstractService<GenreDTO, Genre, Integer> {
     // ===========================================
 
     @Override
-    protected GenreDTO convertToDTO(Genre genre) {
+    protected GenreDTO convertToDTO(GenreEntity genreEntity) {
         return new GenreDTO(
-            genre.getId(),
-            genre.getGenreName()
+            genreEntity.getId(),
+            genreEntity.getGenreName()
         );
     }
 
     @Override
-    protected Genre convertToEntity(GenreDTO dto) {
-        return Genre.builder()
+    protected GenreEntity convertToEntity(GenreDTO dto) {
+        return GenreEntity.builder()
             .id(dto.getId())
             .genreName(dto.genreName())
             .build();
@@ -88,10 +88,10 @@ public class GenreService extends AbstractService<GenreDTO, Genre, Integer> {
      * Get all movies for a specific genre
      */
     public List<String> getMoviesByGenre(Integer genreId) {
-        Genre genre = dao.findById(genreId)
+        GenreEntity genreEntity = dao.findById(genreId)
             .orElseThrow(() -> ApiException.notFound("Genre not found with ID: " + genreId));
 
-        return genre.getMovies().stream()
+        return genreEntity.getMovieEntities().stream()
             .map(movie -> movie.getTitle())
             .collect(Collectors.toList());
     }
@@ -105,16 +105,16 @@ public class GenreService extends AbstractService<GenreDTO, Genre, Integer> {
             throw ApiException.badRequest("ID cannot be null");
         }
 
-        Genre genre = dao.findById(id)
+        GenreEntity genreEntity = dao.findById(id)
             .orElseThrow(() -> ApiException.notFound("Genre not found with ID: " + id));
 
         // Business rule: Cannot delete genre with movies
-        if (!genre.getMovies().isEmpty()) {
+        if (!genreEntity.getMovieEntities().isEmpty()) {
             throw ApiException.conflict("Cannot delete genre with ID " + id + " because it has associated movies");
         }
 
         try {
-            dao.delete(genre);
+            dao.delete(genreEntity);
         } catch (Exception e) {
             throw ApiException.serverError("Failed to delete genre with ID " + id + ": " + e.getMessage());
         }

@@ -1,8 +1,10 @@
 package app.config;
 
 
-import app.entities.Genre;
-import app.entities.Movie;
+import app.Object.entities.*;
+import app.Object.entities.DirectorEntity;
+import app.Object.entities.GenreEntity;
+import app.Object.entities.MovieEntity;
 import app.utils.Utils;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.SessionFactory;
@@ -42,11 +44,11 @@ public class HibernateConfig {
 
     // TODO: IMPORTANT: Add Entity classes here for them to be registered with Hibernate
     private static void getAnnotationConfiguration(Configuration configuration) {
-        configuration.addAnnotatedClass(app.entities.Actor.class);
-        configuration.addAnnotatedClass(app.entities.Director.class);
-        configuration.addAnnotatedClass(app.entities.Movie.class);
-        configuration.addAnnotatedClass(app.entities.Genre.class);
-
+        configuration.addAnnotatedClass(ActorEntity.class);
+        configuration.addAnnotatedClass(DirectorEntity.class);
+        configuration.addAnnotatedClass(MovieEntity.class);
+        configuration.addAnnotatedClass(GenreEntity.class);
+        configuration.addAnnotatedClass(BaseEntity.class);
     }
 
     private static EntityManagerFactory createEMF(boolean forTest) {

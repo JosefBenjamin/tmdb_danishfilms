@@ -1,4 +1,4 @@
-package app.entities;
+package app.Object.entities;
 
 /**
  * Base interface for all Entity classes
@@ -9,11 +9,5 @@ public interface BaseEntity <ID> {
      * Gets the unique identifier for this entity
      * @return the ID of the entity
      */
-    public abstract Integer getId();
-
-    /**
-     * Sets the unique identifier for this entity
-     * @param id the ID to set
-     */
-    public abstract void setId(ID id);
+    ID getId();
 }
