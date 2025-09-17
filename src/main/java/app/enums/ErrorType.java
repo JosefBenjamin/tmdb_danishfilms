@@ -4,7 +4,8 @@ public enum ErrorType {
     NOT_FOUND(404, "Resource not found"),
     ALREADY_EXISTS(409, "Resource already exists"),
     BAD_REQUEST(400, "Bad request"),
-    CONFLICT(409, "Conflict"),
+    CONFLICT(405, "Conflict"),
+    DATABASE_ERROR(401, "Database error"),
     SERVER_ERROR(500, "Internal server error");
 
     private final int errorCode;

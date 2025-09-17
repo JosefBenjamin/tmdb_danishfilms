@@ -42,7 +42,7 @@ public class ApiException extends RuntimeException {
     }
 
 
-    //TODO: 409 conflict
+    //TODO: 405 conflict
     public static ApiException conflict (String msg) {
         return new ApiException(ErrorType.CONFLICT, ErrorType.CONFLICT.getErrorMessage() + "\n" + msg);
 

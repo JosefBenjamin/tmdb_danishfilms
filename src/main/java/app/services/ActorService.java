@@ -4,6 +4,8 @@ import app.DAO.ActorDAO;
 import app.DTO.ActorDTO;
 import app.entities.Actor;
 import app.config.HibernateConfig;
+import app.enums.ErrorType;
+import app.exceptions.ApiException;
 
 import java.util.List;
 import java.util.Set;
@@ -12,6 +14,7 @@ import java.util.stream.Collectors;
 public class ActorService implements Service<ActorDTO, Integer> {
 
     private final ActorDAO actorDAO;
+    ApiException apiExc;
 
     public ActorService() {
         // Use HibernateConfig to get EntityManagerFactory
@@ -44,6 +47,16 @@ public class ActorService implements Service<ActorDTO, Integer> {
         deleteActor(id);
     }
 
+    public Object convert(Object o) {
+        if (o instanceof Actor actor){
+            return convertToDTO(actor);
+        } else  if (o instanceof ActorDTO actorDTO) {
+            return convertToEntity(actorDTO);
+        } else {
+            throw new IllegalArgumentException("Invalid type for conversion to ActorDTO");
+        }
+    }
+
     /**
      * Finds all actors in the database and converts to DTOs
      * @return List of ActorDTO objects
@@ -54,7 +67,7 @@ public class ActorService implements Service<ActorDTO, Integer> {
                     .map(this::convertToDTO)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            throw ActorException.databaseError("retrieve all actors: " + e.getMessage());
+            throw apiExc.badRequest("unable to retrieve any actors: " + e.getMessage());
         }
     }
 
@@ -62,23 +75,20 @@ public class ActorService implements Service<ActorDTO, Integer> {
      * Finds actor by ID and converts to DTO
      * @param id The actor ID
      * @return ActorDTO object
-     * @throws ActorException if actor not found
      */
     public ActorDTO getActorById(Integer id) {
         if (id == null || id <= 0) {
-            throw ActorException.invalidName("Actor ID cannot be null or negative");
+            throw apiExc.notFound("Actor ID cannot be null or negative");
         }
-
         return actorDAO.findById(id)
                 .map(this::convertToDTO)
-                .orElseThrow(() -> ActorException.notFound(id));
+                .orElseThrow(() -> apiExc.notFound("Actor not found with ID: " + id));
     }
 
     /**
      * Saves a new actor
      * @param actorDTO The actor data to persist
      * @return Saved ActorDTO
-     * @throws ActorException for validation or database errors
      */
     public ActorDTO saveActor(ActorDTO actorDTO) {
         validateActorDTO(actorDTO);
@@ -88,7 +98,7 @@ public class ActorService implements Service<ActorDTO, Integer> {
             Actor savedActor = actorDAO.persist(actor);
             return convertToDTO(savedActor);
         } catch (Exception e) {
-            throw ActorException.databaseError("persist actor: " + e.getMessage());
+            throw apiExc.
         }
     }
 
@@ -96,17 +106,14 @@ public class ActorService implements Service<ActorDTO, Integer> {
      * Updates an existing actor
      * @param actorDTO The actor data to update
      * @return Updated ActorDTO
-     * @throws ActorException if actor not found or validation fails
      */
     public ActorDTO updateActor(ActorDTO actorDTO) {
         if (actorDTO.id() == null) {
-            throw ActorException.invalidName("Actor ID is required for update");
+            throw apiExc.badRequest("Actor ID is required for update");
         }
-
         validateActorDTO(actorDTO);
-
         if (actorDAO.findById(actorDTO.id().intValue()).isEmpty()) {
-            throw ActorException.notFound(actorDTO.id().intValue());
+            throw apiExc.notFound("Actor not found with ID: " + actorDTO.id());
         }
 
         try {
@@ -114,7 +121,7 @@ public class ActorService implements Service<ActorDTO, Integer> {
             Actor updatedActor = actorDAO.update(actor);
             return convertToDTO(updatedActor);
         } catch (Exception e) {
-            throw ActorException.databaseError("update actor: " + e.getMessage());
+            throw apiExc.
         }
     }
 
@@ -199,3 +206,4 @@ public class ActorService implements Service<ActorDTO, Integer> {
         }
     }
 }
+
