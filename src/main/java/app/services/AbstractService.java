@@ -3,7 +3,6 @@ import java.util.*;
 import app.DAO.*;
 import app.config.HibernateConfig;
 import app.exceptions.ApiException;
-import app.services.*;
 import app.DTO.*;
 import app.entities.*;
 import jakarta.persistence.EntityManager;
@@ -14,17 +13,18 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.URI;
+import java.util.stream.Collectors;
 
 public abstract class AbstractService<DTO, Entity> {
     private static final String API_URL = "https://api.themoviedb.org/3";
     private static EntityManagerFactory emf;
-    private EntityManager em = emf.createEntityManager();
     private final String apiKey;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
+    ApiException apiExc;
 
     public AbstractService(EntityManagerFactory emf) {
-        this.emf = emf;
+        AbstractService.emf = emf;
         this.apiKey = System.getenv("API_KEY");
         this.objectMapper = new ObjectMapper();
         this.objectMapper.registerModule(new JavaTimeModule());
@@ -33,10 +33,6 @@ public abstract class AbstractService<DTO, Entity> {
 
     /**
      * Generic method to make HTTP GET request to external API
-     * @param endpoint The API endpoint (e.g., "/movie/123", "/person/456")
-     * @param responseClass The class type to deserialize the response to
-     * @param <T> The response type
-     * @return The deserialized response object or null if error
      */
     protected <T> T makeApiRequest(String endpoint, Class<T> responseClass) {
         try {
@@ -64,11 +60,6 @@ public abstract class AbstractService<DTO, Entity> {
 
     /**
      * Generic method to make HTTP GET request with custom URL parameters
-     * @param endpoint The API endpoint
-     * @param params Map of URL parameters
-     * @param responseClass The class type to deserialize the response to
-     * @param <T> The response type
-     * @return The deserialized response object or null if error
      */
     protected <T> T makeApiRequestWithParams(String endpoint, Map<String, String> params, Class<T> responseClass) {
         try {
@@ -99,121 +90,125 @@ public abstract class AbstractService<DTO, Entity> {
     }
 
     /**
-     * Generic method to get entity by ID from external API
-     * Works for any entity type (Movie, Person, etc.)
-     * @param entityId The entity ID
-     * @param responseClass The DTO class to deserialize to
-     * @return The entity as DTO or null if not found
-     */
-    protected Entity getEntityById(Integer entityId, Class<Entity> responseClass) {
-        return makeApiRequest("/" + responseClass.getClass().toString() + "/" + entityId, responseClass);
-        //return makeApiRequest("/" + entityType + "/" + entityId, responseClass);
-    }
-
-    /**
-     * Generic method to search entities with filters
-     * Works for discovering movies, TV shows, or searching people
-     * @param endpoint The search/discover endpoint
-     * @param filters Map of filter parameters
-     * @param responseClass The response class (usually ResponseDTO)
-     * @param <T> The response type
-     * @return The search results
-     */
-    protected <T> T searchEntitiesWithFilters(String endpoint, Map<String, String> filters, Class<T> responseClass) {
-        return makeApiRequestWithParams(endpoint, filters, responseClass);
-    }
-
-
-    /**
      * Generic method to search for any type of content
-     * @param query The search query
-     * @param contentType The type of content ("movie", "person", "tv", "multi")
-     * @param responseClass The response class
-     * @param <T> The response type
-     * @return Search results
      */
     protected <T> T searchContent(String query, String contentType, Class<T> responseClass) {
         Map<String, String> params = new HashMap<>();
         params.put("query", query);
-
         return makeApiRequestWithParams("/search/" + contentType, params, responseClass);
     }
 
-
     /**
-     * Converts DTO to Entity
-     * @param dto The DTO object
+     * Generic convertToEntity method - Works with any DTO type
+     * @param dto The DTO object to convert
      * @return The corresponding Entity object
+     * @throws IllegalArgumentException if the DTO type is not supported
      */
-    public BaseEntity convertToEntity(DTO dto){
-        BaseEntity result = null;
+    @SuppressWarnings("unchecked")
+    public Entity convertToEntity(DTO dto) {
+        if (dto == null) {
+            return null;
+        }
 
-        if (dto.getClass() == (ActorDTO.class) ){
-            result = new Actor().builder()
-                                    .name(((ActorDTO) dto).name())
-                                    .build();
-            return result;
-        } else if (dto.getClass() == (DirectorDTO.class)){
-            result = new Director().builder()
-                                    .name(((DirectorDTO) dto).name())
-                                    .job("Directing")
-                                    .build();
-            return result;
-        } else if (dto.getClass() == (MovieDTO.class)){
-            result = new Movie().builder()
-                                        .title(String.valueOf(dto))
-                                        .releaseYear((((MovieDTO) dto).releaseYear()))
-                                        .originalLanguage(((MovieDTO) dto).originalLanguage())
-                                        .build();
-            return result;
-        } else if (dto.getClass() == (GenreDTO.class)){
-            result = new Genre().builder()
-                                        .genreName(((GenreDTO) dto).genreName())
-                                        .build();
-            return result;
-        } else return result;
+        // Use instanceof checks for compatibility with all Java versions
+        if (dto instanceof ActorDTO) {
+            ActorDTO actorDto = (ActorDTO) dto;
+            return (Entity) Actor.builder()
+                .id(actorDto.id())
+                .name(actorDto.name())
+                .build();
+        }
+
+        if (dto instanceof DirectorDTO) {
+            DirectorDTO directorDto = (DirectorDTO) dto;
+            return (Entity) Director.builder()
+                .id(directorDto.id())
+                .name(directorDto.name())
+                .job(directorDto.job())
+                .build();
+        }
+
+        if (dto instanceof MovieDTO) {
+            MovieDTO movieDto = (MovieDTO) dto;
+            return (Entity) Movie.builder()
+                .id(movieDto.id())
+                .title(movieDto.title())
+                .releaseYear(movieDto.releaseYear())
+                .originalLanguage(movieDto.originalLanguage())
+                .build();
+        }
+
+        if (dto instanceof GenreDTO) {
+            GenreDTO genreDto = (GenreDTO) dto;
+            return (Entity) Genre.builder()
+                .id(genreDto.id())
+                .genreName(genreDto.genreName())
+                .build();
+        }
+
+        throw new IllegalArgumentException("Unsupported DTO type: " + dto.getClass().getSimpleName());
     }
 
+    /**
+     * Generic convertToDTO method - Works with any Entity type
+     * @param entity The Entity object to convert
+     * @return The corresponding DTO object
+     * @throws IllegalArgumentException if the Entity type is not supported
+     */
+    @SuppressWarnings("unchecked")
+    public DTO convertToDTO(Entity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        if (entity instanceof Actor) {
+            Actor actor = (Actor) entity;
+            return (DTO) new ActorDTO(
+                actor.getId(),
+                actor.getName(),
+                "Acting"
+            );
+        }
+
+        if (entity instanceof Director) {
+            Director director = (Director) entity;
+            return (DTO) new DirectorDTO(
+                director.getId(),
+                director.getName(),
+                director.getJob() != null ? director.getJob() : "Directing"
+            );
+        }
+
+        if (entity instanceof Movie) {
+            Movie movie = (Movie) entity;
+            return (DTO) new MovieDTO(
+                movie.getId(),
+                movie.getTitle(),
+                movie.getReleaseYear(),
+                movie.getOriginalLanguage(),
+                new HashSet<>()
+            );
+        }
+
+        if (entity instanceof Genre) {
+            Genre genre = (Genre) entity;
+            return (DTO) new GenreDTO(
+                genre.getId(),
+                genre.getGenreName()
+            );
+        }
+
+        throw new IllegalArgumentException("Unsupported Entity type: " + entity.getClass().getSimpleName());
+    }
 
     /**
-     * Converts Entity to DTO
-     * @param entity The Entity object
-     * @return The corresponding DTO object
+     * Generic method to convert a list of DTOs to a list of Entities
      */
-    public Record convertToDTO(Entity entity) {
-        Record result = null;
-        if (entity.getClass() == Actor.class){
-            result = (ActorDTO) new ActorDTO(
-                                        ((Actor) entity).getId(),
-                                        ((Actor) entity).getName(),
-                                        "Acting"
-                                            );
-                 return result;
-        } else if (entity.getClass() == Director.class){
-            result = (DirectorDTO) new DirectorDTO(
-                                        ((Director) entity).getId(),
-                                        ((Director) entity).getName(),
-                                        "Directing"
-                                            );
-                 return result;
-        } else if (entity.getClass() == Movie.class){
-            result = (MovieDTO) new MovieDTO(
-                                        ((Movie) entity).getId(),
-                                        ((Movie) entity).getTitle(),
-                                        ((Movie) entity).getReleaseYear(),
-                                        ((Movie) entity).getOriginalLanguage(),
-                                        new HashSet<Integer>()
-                                            );
-                 return result;
-
-        } else if (entity.getClass() == Genre.class){
-            result = (GenreDTO) new GenreDTO(
-                                        ((Genre) entity).getId(),
-                                        ((Genre) entity).getGenreName()
-                                            );
-                 return result;
-
-        } else return result;
+    public List<BaseEntity> dtoListToEntityList(List<DTO> dtoList) {
+        return dtoList.stream()
+                .map(this::convertToEntity)
+                .map(entity -> (BaseEntity) entity)
+                .collect(Collectors.toList());
     }
 
 
@@ -322,63 +317,24 @@ public abstract class AbstractService<DTO, Entity> {
      * @param entity The entity to delete
      */
     public void delete(Entity entity){
-        try (EntityManager em = emf.createEntityManager()) {
-            em.getTransaction().begin();
-                if(entity instanceof Actor){
-                    try {
-                        Actor managedActor = em.find(Actor.class,entity);
-                        if (managedActor != null) {
-                            em.remove(managedActor);
-                        }
-                        em.getTransaction().commit();
-                    } catch (Exception e) {
-                        em.getTransaction().rollback();
-                        throw e;
-                    }
-                } else if (entity instanceof Director){
-                    try {
-                        Director managedDirector = em.find(Director.class,entity);
-                        if (managedDirector != null) {
-                            em.remove(managedDirector);
-                        }
-                        em.getTransaction().commit();
-                    } catch (Exception e) {
-                        em.getTransaction().rollback();
-                        throw e;
-                    }
-                } else if (entity instanceof Genre){
-                    try {
-                        Genre managedGenre = em.find(Genre.class,entity);
-                        if (managedGenre != null) {
-                            em.remove(managedGenre);
-                        }
-                        em.getTransaction().commit();
-                    } catch (Exception e) {
-                        em.getTransaction().rollback();
-                        throw e;
-                    }
-                } else if (entity instanceof Movie){
-                    try {
-                        Movie managedMovie = em.find(Movie.class,entity);
-                        if (managedMovie != null) {
-                            em.remove(managedMovie);
-                        }
-                        em.getTransaction().commit();
-                    } catch (Exception e) {
-                        em.getTransaction().rollback();
-                        throw e;
-                    }
-                }
+        if (entity instanceof Movie){
+           MovieDAO dao = new MovieDAO(emf);
+           dao.delete((Movie) entity);
 
-                BaseEntity managedEntity = (BaseEntity) em.find(entity.getClass(), ((BaseEntity) entity).getId());
-                if (managedEntity != null) {
-                    em.remove(managedEntity);
-                }
-                em.getTransaction().commit();
+        } else if (entity instanceof Actor){
+            ActorDAO dao = new ActorDAO(emf);
+            dao.delete((Actor) entity);
 
-        } catch (Exception e) {
-            em.getTransaction().rollback();
-            throw ApiException.serverError("Could not delete entity: " + e.getMessage());
+        } else if (entity instanceof Director){
+            DirectorDAO dao = new DirectorDAO(emf);
+            dao.delete((Director) entity);
+
+        } else if (entity instanceof Genre){
+            GenreDAO dao = new GenreDAO(emf);
+            dao.delete((Genre) entity);
+
+        } else {
+            throw apiExc.badRequest("Unsupported entity type for deletion");
         }
     }
 

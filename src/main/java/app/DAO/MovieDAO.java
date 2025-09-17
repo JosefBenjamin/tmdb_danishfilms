@@ -60,23 +60,23 @@ public class MovieDAO implements IDAO<Movie, Integer> {
             }
         }
     }
-//
-//    @Override
-//    public void delete(Movie entity) {
-//        try (EntityManager em = emf.createEntityManager()) {
-//            em.getTransaction().begin();
-//            try {
-//                Movie managedMovie = em.find(Movie.class, entity.getId());
-//                if (managedMovie != null) {
-//                    em.remove(managedMovie);
-//                }
-//                em.getTransaction().commit();
-//            } catch (Exception e) {
-//                em.getTransaction().rollback();
-//                throw e;
-//            }
-//        }
-//    }
+
+    @Override
+    public void delete(Movie entity) {
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+            try {
+                Movie managedMovie = em.find(Movie.class, entity.getId());
+                if (managedMovie != null) {
+                    em.remove(managedMovie);
+                }
+                em.getTransaction().commit();
+            } catch (Exception e) {
+                em.getTransaction().rollback();
+                throw e;
+            }
+        }
+    }
 
     // Additional query methods
     public List<Movie> findByTitle(String title) {

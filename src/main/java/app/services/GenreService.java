@@ -28,7 +28,7 @@ public class GenreService extends AbstractService<GenreDTO, Genre> {
      * Finds all genres in the database and converts to DTOs
      * @return List of GenreDTO objects
      */
-    public List<Genre> getAllGenres() {
+    public List<Genre> findAll() {
         try {
             return findAll(Genre.class);
         } catch (Exception e) {
@@ -180,7 +180,7 @@ public class GenreService extends AbstractService<GenreDTO, Genre> {
      * @param genre The Genre entity
      * @return GenreDTO object
      */
-    private GenreDTO convertToDTO(Genre genre) {
+    public GenreDTO convertToDTO(Genre genre) {
         Set<Integer> movieIds = genre.getMovies().stream()
                 .map(Movie::getId)
                 .collect(Collectors.toSet());
@@ -196,12 +196,12 @@ public class GenreService extends AbstractService<GenreDTO, Genre> {
      * @param genreDTO The GenreDTO
      * @return Genre entity
      */
-    private Genre convertToEntity(GenreDTO genreDTO) {
-        Genre genre = new Genre();
-        genre.setId(genreDTO.id());
-        genre.setGenreName(genreDTO.genreName());
-        // Note: Movies would need to be fetched and set separately if needed
+    public Genre convertToEntity(GenreDTO genreDTO) {
+           Genre genre = new Genre();
+           genre.setId(genreDTO.id());
+           genre.setGenreName(genreDTO.genreName());
         return genre;
+        // Note: Movies would need to be fetched and set separately if needed
     }
 
     /**

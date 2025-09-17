@@ -16,28 +16,26 @@ public class MovieService extends AbstractService<MovieDTO, Movie> {
 
     private final MovieDAO movieDAO;
     private final EntityManagerFactory emf;
+    AbstractService getClass;
     ApiException apiExc;
 
     public MovieService(EntityManagerFactory emf) {
         // Use HibernateConfig to get EntityManagerFactory
         super(emf);
         this.emf = emf;
+        getClass = new AbstractService(emf) {};
         this.movieDAO = new MovieDAO(emf);
     }
 
     // Implementation of Service interface methods
-    public List<MovieDTO> getAll() {
-        return getAllMovies();
+    public List<Movie> getAll() {
+        return findAll(Movie.class);
     }
 
-    public MovieDTO getById(Integer id) {
-        return getMovieById(id);
+    public Optional<Movie> getById(Integer id) {
+        return movieDAO.findById(id);
     }
 
-
-    public MovieDTO save(MovieDTO dto) {
-        return saveMovie(dto);
-    }
 
     public Movie update(Movie movie) {
         return (Movie) updateEntity(movie);
@@ -51,73 +49,72 @@ public class MovieService extends AbstractService<MovieDTO, Movie> {
      * Finds all movies in the database and converts to DTOs
      * @return List of MovieDTO objects
      */
-    public List<MovieDTO> getAllMovies() {
-        try {
-            return movieDAO.findAll().stream()
-                    .map(this::convertToDTO)
-                    .collect(Collectors.toList());
-        } catch (RuntimeException e) {
-            throw apiExc.serverError("could not retrieve all movies: " + e.getMessage());
-        }
-    }
+//    public List<MovieDTO> getAllMovies() {
+//        try {
+//            return movieDAO.findAll().stream()
+//                    .map(this::convertToDTO)
+//                    .collect(Collectors.toList());
+//        } catch (RuntimeException e) {
+//            throw apiExc.serverError("could not retrieve all movies: " + e.getMessage());
+//        }
+//    }
 
     /**
      * Finds movie by ID and converts to DTO
      * @param id The movie ID
      * @return MovieDTO object
      */
-    public MovieDTO getMovieById(Integer id) {
-        if (id == null || id <= 0) {
-            throw apiExc.badRequest("Movie ID cannot be null or negative");
-        }
-
-        return movieDAO.findById(id)
-                .map(this::convertToDTO)
-                .orElseThrow(() -> apiExc.notFound("Movie could not be found with ID: " + id));
-    }
+//    public MovieDTO getMovieById(Integer id) {
+//        if (id == null || id <= 0) {
+//            throw apiExc.badRequest("Movie ID cannot be null or negative");
+//        }
+//
+//        return movieDAO.findById(id)
+//                .map(this::convertToDTO)
+//                .orElseThrow(() -> apiExc.notFound("Movie could not be found with ID: " + id));
+//    }
 
     /**
      * Saves a new movie
      * @param movieDTO The movie data to persist
      * @return Saved MovieDTO
      */
-    public MovieDTO saveMovie(MovieDTO movieDTO) {
-        validateMovieDTO(movieDTO);
-
-        try {
-            Movie movie = convertToEntity(movieDTO);
-            Movie savedMovie = movieDAO.persist(movie);
-            return convertToDTO(savedMovie);
-        } catch (RuntimeException e) {
-            throw apiExc.serverError("could not persist movie: " + e.getMessage());
-        }
-    }
+//    public MovieDTO saveMovie(MovieDTO movieDTO) {
+//        validateMovieDTO(movieDTO);
+//
+//        try {
+//
+//            return save(movieDTO);
+//        } catch (RuntimeException e) {
+//            throw apiExc.serverError("could not persist movie: " + e.getMessage());
+//        }
+//    }
 
     /**
      * Updates an existing movie
      * @param movieDTO The movie data to update
      * @return Updated MovieDTO
-     */
-    public MovieDTO updateMovie(MovieDTO movieDTO) {
-        if (movieDTO.id() == null) {
-            throw apiExc.badRequest("Movie ID is required for update");
-        }
-
-        validateMovieDTO(movieDTO);
-
-        // Check if movie exists
-        if (movieDAO.findById(movieDTO.id()).isEmpty()) {
-            throw apiExc.notFound("Movie could not be found with ID: " + movieDTO.id());
-        }
-
-        try {
-            Movie movie = convertToEntity(movieDTO);
-            Movie updatedMovie = movieDAO.update(movie);
-            return convertToDTO(updatedMovie);
-        } catch (RuntimeException e) {
-            throw apiExc.serverError("could not update movie: " + e.getMessage());
-        }
-    }
+//     */
+//    public MovieDTO updateMovie(MovieDTO movieDTO) {
+//        if (movieDTO.id() == null) {
+//            throw apiExc.badRequest("Movie ID is required for update");
+//        }
+//
+//        validateMovieDTO(movieDTO);
+//
+//        // Check if movie exists
+//        if (movieDAO.findById(movieDTO.id()).isEmpty()) {
+//            throw apiExc.notFound("Movie could not be found with ID: " + movieDTO.id());
+//        }
+//
+//        try {
+//            Movie movie = AbstractService.getClass().convertToEntity(movieDTO);
+//            Movie updatedMovie = movieDAO.update(movie);
+//            return convertToDTO(updatedMovie);
+//        } catch (RuntimeException e) {
+//            throw apiExc.serverError("could not update movie: " + e.getMessage());
+//        }
+//    }
 
     /**
      * Deletes a movie by ID
@@ -297,14 +294,4 @@ public class MovieService extends AbstractService<MovieDTO, Movie> {
         }
     }
 
-    // Example usage method - can be removed in production
-    public void demonstrateUsage() {
-        List<MovieDTO> allMovies = getAllMovies();
-        System.out.println("Found " + allMovies.size() + " movies:");
-
-        for (MovieDTO movie : allMovies) {
-            System.out.println("- " + movie.title() + " (" +
-                (movie.releaseYear() != null ? movie.releaseYear() : "Unknown") + ")");
-        }
-    }
 }
