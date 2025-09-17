@@ -1,6 +1,6 @@
 package app.Function.DAO;
 
-import app.Object.entities.MovieEntity;
+import app.Instance.entities.MovieEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;

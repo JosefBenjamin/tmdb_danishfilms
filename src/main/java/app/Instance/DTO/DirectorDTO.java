@@ -1,4 +1,4 @@
-package app.Object.DTO;
+package app.Instance.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -11,7 +11,7 @@ public record DirectorDTO(
 
     @JsonProperty("job")
     String job
-) implements BaseDTO<Integer> {
+) implements IDTO<Integer> {
 
     @Override
     public Integer getId() {

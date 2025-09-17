@@ -1,8 +1,8 @@
 package app.Function.services;
 
 import app.Function.DAO.DirectorDAO;
-import app.Object.DTO.DirectorDTO;
-import app.Object.entities.DirectorEntity;
+import app.Instance.DTO.DirectorDTO;
+import app.Instance.entities.DirectorEntity;
 import app.exceptions.ApiException;
 import jakarta.persistence.EntityManagerFactory;
 

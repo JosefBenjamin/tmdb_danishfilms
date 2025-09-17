@@ -1,4 +1,4 @@
-package app.Object.entities;
+package app.Instance.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -19,7 +19,7 @@ import java.util.Set;
 @Table(name = "genres")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(exclude = {"movieEntities"})
-public class GenreEntity implements BaseEntity<Integer> {
+public class GenreEntity implements IEntity<Integer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

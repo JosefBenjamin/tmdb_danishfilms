@@ -1,8 +1,8 @@
 package app.Function.services;
 
 import app.Function.DAO.IDAO;
-import app.Object.DTO.BaseDTO;
-import app.Object.entities.BaseEntity;
+import app.Instance.DTO.IDTO;
+import app.Instance.entities.IEntity;
 import app.exceptions.ApiException;
 import jakarta.persistence.EntityManagerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * @param <Entity> The Entity type extending BaseEntity
  * @param <ID> The ID type (Integer, Long, etc.)
  */
-public abstract class AbstractService<DTO extends BaseDTO<ID>, Entity extends BaseEntity<ID>, ID> implements IService<DTO, ID> {
+public abstract class AbstractService<DTO extends IDTO<ID>, Entity extends IEntity<ID>, ID> implements IService<DTO, ID> {
 
     // HTTP Client fields
     private static final String API_URL = "https://api.themoviedb.org/3";

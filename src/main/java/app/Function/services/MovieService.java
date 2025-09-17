@@ -1,10 +1,10 @@
 package app.Function.services;
 
 import app.Function.DAO.MovieDAO;
-import app.Object.DTO.MovieDTO;
-import app.Object.DTO.ResponseDTO;
-import app.Object.entities.GenreEntity;
-import app.Object.entities.MovieEntity;
+import app.Instance.DTO.MovieDTO;
+import app.Instance.DTO.ResponseDTO;
+import app.Instance.entities.GenreEntity;
+import app.Instance.entities.MovieEntity;
 import app.exceptions.ApiException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;

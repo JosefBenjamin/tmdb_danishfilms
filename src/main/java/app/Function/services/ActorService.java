@@ -1,10 +1,10 @@
 package app.Function.services;
 
 import app.Function.DAO.ActorDAO;
-import app.Object.DTO.ActorDTO;
-import app.Object.DTO.PersonDTO;
-import app.Object.DTO.ResponseDTO;
-import app.Object.entities.ActorEntity;
+import app.Instance.DTO.ActorDTO;
+import app.Instance.DTO.PersonDTO;
+import app.Instance.DTO.ResponseDTO;
+import app.Instance.entities.ActorEntity;
 import app.exceptions.ApiException;
 import jakarta.persistence.EntityManagerFactory;
 

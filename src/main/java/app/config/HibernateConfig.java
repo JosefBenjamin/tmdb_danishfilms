@@ -1,10 +1,10 @@
 package app.config;
 
 
-import app.Object.entities.*;
-import app.Object.entities.DirectorEntity;
-import app.Object.entities.GenreEntity;
-import app.Object.entities.MovieEntity;
+import app.Instance.entities.*;
+import app.Instance.entities.DirectorEntity;
+import app.Instance.entities.GenreEntity;
+import app.Instance.entities.MovieEntity;
 import app.utils.Utils;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.SessionFactory;
@@ -48,7 +48,7 @@ public class HibernateConfig {
         configuration.addAnnotatedClass(DirectorEntity.class);
         configuration.addAnnotatedClass(MovieEntity.class);
         configuration.addAnnotatedClass(GenreEntity.class);
-        configuration.addAnnotatedClass(BaseEntity.class);
+        configuration.addAnnotatedClass(IEntity.class);
     }
 
     private static EntityManagerFactory createEMF(boolean forTest) {

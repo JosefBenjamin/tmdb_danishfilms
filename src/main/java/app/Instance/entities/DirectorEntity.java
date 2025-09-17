@@ -1,4 +1,4 @@
-package app.Object.entities;
+package app.Instance.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,7 +13,7 @@ import java.util.Set;
 @Table(name = "directors")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true) //only uses id for equality
 @ToString(exclude = {"actorEntities", "movieEntities"}) // avoids recursion
-public class DirectorEntity implements BaseEntity<Integer> {
+public class DirectorEntity implements IEntity<Integer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

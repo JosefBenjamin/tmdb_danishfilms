@@ -1,8 +1,8 @@
 package app;
 import app.Function.DAO.ActorDAO;
 import app.Function.services.ActorService;
-import app.Object.DTO.ActorDTO;
-import app.Object.entities.ActorEntity;
+import app.Instance.DTO.ActorDTO;
+import app.Instance.entities.ActorEntity;
 import app.config.*;
 import jakarta.persistence.EntityManagerFactory;
 

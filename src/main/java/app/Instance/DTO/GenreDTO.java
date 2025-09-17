@@ -1,4 +1,4 @@
-package app.Object.DTO;
+package app.Instance.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -8,7 +8,7 @@ public record GenreDTO(
 
     @JsonProperty("name")
     String genreName
-) implements BaseDTO<Integer> {
+) implements IDTO<Integer> {
 
     @Override
     public Integer getId() {

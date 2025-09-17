@@ -1,10 +1,10 @@
-package app.Object.entities;
+package app.Instance.entities;
 
 /**
  * Base interface for all Entity classes
  * Provides common contract for all entity implementations
  */
-public interface BaseEntity <ID> {
+public interface IEntity<ID> {
     /**
      * Gets the unique identifier for this entity
      * @return the ID of the entity

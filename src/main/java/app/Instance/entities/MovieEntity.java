@@ -1,4 +1,4 @@
-package app.Object.entities;
+package app.Instance.entities;
 
 
 import jakarta.persistence.*;
@@ -15,7 +15,7 @@ import java.util.Set;
 @Table(name = "movies")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(exclude = {"genreEntities", "actorEntities", "directorEntity"})
-public class MovieEntity implements BaseEntity<Integer> {
+public class MovieEntity implements IEntity<Integer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

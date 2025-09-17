@@ -1,6 +1,6 @@
 package app.Function.DAO;
 
-import app.Object.entities.DirectorEntity;
+import app.Instance.entities.DirectorEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
