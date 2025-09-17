@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 /**
  * Generic Abstract Service providing CRUD operations and HTTP client functionality
- * @param <DTO> The Data Transfer Object type extending BaseDTO
+ * @param <DTO> The Data Transfer Object type extending IDTO
  * @param <Entity> The Entity type extending BaseEntity
  * @param <ID> The ID type (Integer, Long, etc.)
  */
@@ -32,7 +32,8 @@ public abstract class AbstractService<DTO extends IDTO<ID>, Entity extends IEnti
     protected final EntityManagerFactory emf;
     protected final IDAO<Entity, ID> dao;
 
-    public AbstractService(EntityManagerFactory emf, IDAO<Entity, ID> dao) {
+    public AbstractService(EntityManagerFactory emf,
+                           IDAO<Entity, ID> dao) {
         this.emf = emf;
         this.dao = dao;
 

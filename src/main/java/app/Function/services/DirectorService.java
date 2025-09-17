@@ -54,24 +54,24 @@ public class DirectorService extends AbstractService<DirectorDTO, DirectorEntity
     /**
      * Custom delete with business rules
      */
-    @Override
-    public void delete(Integer id) {
-        if (id == null) {
-            throw ApiException.badRequest("ID cannot be null");
-        }
-
-        DirectorEntity directorEntity = dao.findById(id)
-            .orElseThrow(() -> ApiException.notFound("Director not found with ID: " + id));
-
-        // Business rule: Cannot delete director with movies
-        if (!directorEntity.getMovieEntities().isEmpty()) {
-            throw ApiException.conflict("Cannot delete director with ID " + id + " because they have directed movies");
-        }
-
-        try {
-            dao.delete(directorEntity);
-        } catch (Exception e) {
-            throw ApiException.serverError("Failed to delete director with ID " + id + ": " + e.getMessage());
-        }
-    }
+//    @Override
+//    public void delete(Integer id) {
+//        if (id == null) {
+//            throw ApiException.badRequest("ID cannot be null");
+//        }
+//
+//        DirectorEntity directorEntity = dao.findById(id)
+//            .orElseThrow(() -> ApiException.notFound("Director not found with ID: " + id));
+//
+//        // Business rule: Cannot delete director with movies
+//        if (!directorEntity.getMovieEntities().isEmpty()) {
+//            throw ApiException.conflict("Cannot delete director with ID " + id + " because they have directed movies");
+//        }
+//
+//        try {
+//            dao.delete(directorEntity);
+//        } catch (Exception e) {
+//            throw ApiException.serverError("Failed to delete director with ID " + id + ": " + e.getMessage());
+//        }
+//    }
 }

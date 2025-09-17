@@ -17,7 +17,7 @@ public interface IService<DTO, ID> {
     /**
      * Get entity by ID as DTO
      */
-    Optional<DTO> getById(ID id);
+     Optional<DTO> getById(ID id);
 
     /**
      * Save entity from DTO

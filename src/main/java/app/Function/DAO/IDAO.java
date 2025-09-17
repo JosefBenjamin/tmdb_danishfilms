@@ -14,5 +14,6 @@ public interface IDAO<CLASS, ID> {
     CLASS update(CLASS entity);
 
     void delete(CLASS entity);
+
 }
 
