@@ -10,6 +10,7 @@ import app.exceptions.ApiException;
 import jakarta.persistence.EntityManagerFactory;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,8 +29,8 @@ public class DirectorService extends AbstractService<DirectorDTO, Director> {
         return getAllDirectors();
     }
 
-    public DirectorDTO getById(Integer id) {
-        return getDirectorById(id);
+    public Optional<Director> getById(Integer id) {
+        return findById(id, Director.class);
     }
 
     public DirectorDTO save(DirectorDTO dto) {
