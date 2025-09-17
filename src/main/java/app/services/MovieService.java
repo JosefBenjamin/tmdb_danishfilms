@@ -2,6 +2,7 @@ package app.services;
 
 import app.DAO.MovieDAO;
 import app.DTO.MovieDTO;
+import app.DTO.ResponseDTO;
 import app.entities.Movie;
 import app.entities.Actor;
 import app.entities.Director;
@@ -11,45 +12,40 @@ import app.exceptions.ApiException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public class MovieService extends AbstractService<MovieDTO, Integer> {
+public class MovieService extends AbstractService<MovieDTO, Movie> {
 
     private final MovieDAO movieDAO;
     private final EntityManagerFactory emf;
     ApiException apiExc;
 
-    public MovieService() {
+    public MovieService(EntityManagerFactory emf) {
         // Use HibernateConfig to get EntityManagerFactory
-        this.emf = HibernateConfig.getEntityManagerFactory();
+        super(emf);
+        this.emf = emf;
         this.movieDAO = new MovieDAO(emf);
     }
 
     // Implementation of Service interface methods
-    @Override
     public List<MovieDTO> getAll() {
         return getAllMovies();
     }
 
-    @Override
     public MovieDTO getById(Integer id) {
         return getMovieById(id);
     }
 
-    @Override
+
     public MovieDTO save(MovieDTO dto) {
         return saveMovie(dto);
     }
 
-    @Override
     public MovieDTO update(MovieDTO dto) {
         return updateMovie(dto);
     }
 
-    @Override
     public void delete(Integer id) {
         deleteMovie(id);
     }
@@ -146,6 +142,31 @@ public class MovieService extends AbstractService<MovieDTO, Integer> {
     }
 
     /**
+     * Get movies by rating range from external API
+     * @param min Minimum rating
+     * @param max Maximum rating
+     * @return List of MovieDTO objects
+     */
+    protected List<MovieDTO> getMoviesByRating(double min, double max) {
+        try {
+            Map<String, String> params = new HashMap<>();
+            params.put("vote_average.gte", String.valueOf(min));
+            params.put("vote_average.lte", String.valueOf(max));
+
+            ResponseDTO response = makeApiRequestWithParams("/discover/movie", params, ResponseDTO.class);
+
+            if (response != null && response.results() != null) {
+                return response.results();
+            } else {
+                return new ArrayList<>();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    /**
      * Searches movies by title
      * @param title The title to search for
      * @return List of matching MovieDTO objects
@@ -187,21 +208,21 @@ public class MovieService extends AbstractService<MovieDTO, Integer> {
      * Converts Movie entity to MovieDTO
      * @param movie The Movie entity
      * @return MovieDTO object
-     */
-    private MovieDTO convertToDTO(Movie movie) {
-        Set<Integer> genreIds = movie.getGenres().stream()
-                .map(Genre::getId)
-                .collect(Collectors.toSet());
-
-        Set<Integer> actorIds = movie.getActors().stream()
-                .map(Actor::getId)
-                .collect(Collectors.toSet());
-
-        Integer directorId = movie.getDirector() != null ? movie.getDirector().getId() : null;
-
-        return null;
-
-    }
+//     */
+//    private MovieDTO convertToDTO(Movie movie) {
+//        Set<Integer> genreIds = movie.getGenres().stream()
+//                .map(Genre::getId)
+//                .collect(Collectors.toSet());
+//
+//        Set<Integer> actorIds = movie.getActors().stream()
+//                .map(Actor::getId)
+//                .collect(Collectors.toSet());
+//
+//        Integer directorId = movie.getDirector() != null ? movie.getDirector().getId() : null;
+//
+//        return null;
+//
+//    }
 
     /**
      * Converts MovieDTO to Movie entity

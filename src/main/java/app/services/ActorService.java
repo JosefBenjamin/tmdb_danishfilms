@@ -11,10 +11,11 @@ import app.exceptions.ApiException;
 import jakarta.persistence.EntityManagerFactory;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ActorService extends AbstractService<ActorDTO, Actor > {
+public class ActorService extends AbstractService<ActorDTO, Actor> {
 //public class ActorService extends AbstractService<ActorDTO, Actor, Integer> implements Service<ActorDTO, Integer> {
     private final ActorDAO actorDAO;
     ApiException apiExc;
@@ -71,101 +72,71 @@ public class ActorService extends AbstractService<ActorDTO, Actor > {
      * Finds all actors in the database and converts to DTOs
      * @return List of ActorDTO objects
      */
-    public List<ActorDTO> getAllActors() {
-        try {
-            return actorDAO.findAll().stream()
-                    .map(this::convertToDTO)
-                    .collect(Collectors.toList());
-        } catch (RuntimeException e) {
-            throw apiExc.badRequest("unable to retrieve any actors: " + e.getMessage());
-        }
-    }
+//    public List<ActorDTO> getAllActors() {
+//        try {
+//            return actorDAO.findAll().stream()
+//                    .map(this::convertToDTO)
+//                    .collect(Collectors.toList());
+//        } catch (RuntimeException e) {
+//            throw apiExc.badRequest("unable to retrieve any actors: " + e.getMessage());
+//        }
+//    }
 
     /**
      * Finds actor by ID and converts to DTO
      * @param id The actor ID
      * @return ActorDTO object
      */
-    public ActorDTO getActorById(Integer id) {
+//    public ActorDTO getActorById(Integer id) {
+//        if (id == null || id <= 0) {
+//            throw apiExc.badRequest("Actor ID cannot be null or negative");
+//        }
+//        return actorDAO.findById(id)
+//                .map(this::getEntityById( id, Actor.class))
+//                .orElseThrow(() -> apiExc.notFound("Actor not found with ID: " + id));
+//    }
+
+
+    public Optional<Actor> findById(Integer id){
         if (id == null || id <= 0) {
             throw apiExc.badRequest("Actor ID cannot be null or negative");
         }
-        return actorDAO.findById(id)
-                .map(this::convertToDTO)
-                .orElseThrow(() -> apiExc.notFound("Actor not found with ID: " + id));
+        return actorDAO.findById(id);
     }
 
-    /**
-     * Saves a new actor
-     * @param actorDTO The actor data to persist
-     * @return Saved ActorDTO
-     */
-    public ActorDTO saveActor(ActorDTO actorDTO) {
-        validateActorDTO(actorDTO);
 
-        try {
-            Actor actor = convertToEntity(actorDTO);
-            Actor savedActor = actorDAO.persist(actor);
-            return convertToDTO(savedActor);
-        } catch (Exception e) {
-            throw apiExc.alreadyExists("Actor already exists");
-        }
-    }
-
-    /**
-     * Updates an existing actor
-     * @param actorDTO The actor data to update
-     * @return Updated ActorDTO
-     */
-    public ActorDTO updateActor(ActorDTO actorDTO) {
-        if (actorDTO.id() == null) {
-            throw apiExc.badRequest("Actor ID is required for update");
-        }
-        validateActorDTO(actorDTO);
-        if (actorDAO.findById(actorDTO.id().intValue()).isEmpty()) {
-            throw apiExc.notFound("Actor not found with ID: /n" + actorDTO.id());
-        }
-
-        try {
-            Actor actor = convertToEntity(actorDTO);
-            Actor updatedActor = actorDAO.update(actor);
-            return convertToDTO(updatedActor);
-        } catch (RuntimeException e) {
-            throw apiExc.serverError("update actor: /n" + e.getMessage());
-        }
-    }
 
     /**
      * Deletes an actor by ID
      * @param id The actor ID to delete
      */
-    public void deleteActor(Integer id) {
-        if (id == null || id <= 0) {
-            throw apiExc.badRequest("Actor ID cannot be null or negative");
-        }
-
-        Actor actor = actorDAO.findById(id)
-                .orElseThrow(() -> apiExc.notFound("Actor not found with ID: " + id));
-
-        try {
-            actorDAO.delete(actor);
-        } catch (RuntimeException e) {
-            throw apiExc.serverError("Could not delete actor with ID: " + id);
-        }
-    }
+//    public void deleteActor(Integer id) {
+//        if (id == null || id <= 0) {
+//            throw apiExc.badRequest("Actor ID cannot be null or negative");
+//        }
+//
+//        Actor actor = actorDAO.findById(id)
+//                .orElseThrow(() -> apiExc.notFound("Actor not found with ID: " + id));
+//
+//        try {
+//            actorDAO.delete(actor);
+//        } catch (RuntimeException e) {
+//            throw apiExc.serverError("Could not delete actor with ID: " + id);
+//        }
+//    }
 
     /**
      * Converts Actor entity to ActorDTO
      * @param actor The Actor entity
      * @return ActorDTO object
-     */
-    public ActorDTO convertToDTO(Actor actor) {
-        Set<Integer> directorIds = actor.getDirectors().stream()
-                .map(director -> director.getId())
-                .collect(Collectors.toSet());
-
-        return null;
-    }
+//     */
+//    public ActorDTO convertToDTO(Actor actor) {
+//        Set<Integer> directorIds = actor.getDirectors().stream()
+//                .map(director -> director.getId())
+//                .collect(Collectors.toSet());
+//
+//        return null;
+//    }
 
     /**
      * Converts ActorDTO to Actor entity
@@ -196,15 +167,7 @@ public class ActorService extends AbstractService<ActorDTO, Actor > {
 
     }
 
-    // Example usage method - can be removed in production
-    public void demonstrateUsage() {
-        List<ActorDTO> allActors = getAllActors();
-        System.out.println("Found " + allActors.size() + " actors:");
-
-        for (ActorDTO actor : allActors) {
-            //System.out.println("- " + actor.name() + " (Age: " + actor.age() + ")");
-        }
-    }
 }
+
 
 

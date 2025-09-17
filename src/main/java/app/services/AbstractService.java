@@ -101,13 +101,13 @@ public abstract class AbstractService<DTO, Entity> {
     /**
      * Generic method to get entity by ID from external API
      * Works for any entity type (Movie, Person, etc.)
-     * @param entityType The entity type ("movie", "person", "tv", etc.)
      * @param entityId The entity ID
      * @param responseClass The DTO class to deserialize to
      * @return The entity as DTO or null if not found
      */
-    protected Entity getEntityById(String entityType, int entityId, Class<Entity> responseClass) {
-        return makeApiRequest("/" + entityType + "/" + entityId, responseClass);
+    protected Entity getEntityById(Integer entityId, Class<Entity> responseClass) {
+        return makeApiRequest("/" + responseClass.getClass().toString() + "/" + entityId, responseClass);
+        //return makeApiRequest("/" + entityType + "/" + entityId, responseClass);
     }
 
     /**
@@ -123,30 +123,6 @@ public abstract class AbstractService<DTO, Entity> {
         return makeApiRequestWithParams(endpoint, filters, responseClass);
     }
 
-    /**
-     * Get movies by rating range from external API
-     * @param min Minimum rating
-     * @param max Maximum rating
-     * @return List of MovieDTO objects
-     */
-    protected List<MovieDTO> getMoviesByRating(double min, double max) {
-        try {
-            Map<String, String> params = new HashMap<>();
-            params.put("vote_average.gte", String.valueOf(min));
-            params.put("vote_average.lte", String.valueOf(max));
-
-            ResponseDTO response = makeApiRequestWithParams("/discover/movie", params, ResponseDTO.class);
-
-            if (response != null && response.results() != null) {
-                return response.results();
-            } else {
-                return new ArrayList<>();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ArrayList<>();
-        }
-    }
 
     /**
      * Generic method to search for any type of content
@@ -163,6 +139,12 @@ public abstract class AbstractService<DTO, Entity> {
         return makeApiRequestWithParams("/search/" + contentType, params, responseClass);
     }
 
+
+    /**
+     * Converts DTO to Entity
+     * @param dto The DTO object
+     * @return The corresponding Entity object
+     */
     public BaseEntity convertToEntity(DTO dto){
         BaseEntity result = null;
 
@@ -192,6 +174,12 @@ public abstract class AbstractService<DTO, Entity> {
         } else return result;
     }
 
+
+    /**
+     * Converts Entity to DTO
+     * @param entity The Entity object
+     * @return The corresponding DTO object
+     */
     public Record convertToDTO(Entity entity) {
         Record result = null;
         if (entity.getClass() == Actor.class){
@@ -228,6 +216,12 @@ public abstract class AbstractService<DTO, Entity> {
         } else return result;
     }
 
+
+    /**
+     * Saves an entity to the database
+     * @param entity The entity to save
+     * @return The saved entity with generated ID
+     */
     public BaseEntity saveEntity(Entity entity) {
         BaseEntity result = null;
                 try (EntityManager em = emf.createEntityManager()) {
@@ -273,6 +267,11 @@ public abstract class AbstractService<DTO, Entity> {
         }
     }
 
+    /**
+     * Updates an existing entity in the database
+     * @param entity The entity to update
+     * @return The updated entity
+     */
     public BaseEntity updateEntity(Entity entity) {
         BaseEntity result = null;
                 try (EntityManager em = emf.createEntityManager()) {
@@ -318,6 +317,10 @@ public abstract class AbstractService<DTO, Entity> {
         }
     }
 
+    /**
+     * Deletes an entity from the database
+     * @param entity The entity to delete
+     */
     public void delete(Entity entity){
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
@@ -376,6 +379,20 @@ public abstract class AbstractService<DTO, Entity> {
         } catch (Exception e) {
             em.getTransaction().rollback();
             throw ApiException.serverError("Could not delete entity: " + e.getMessage());
+        }
+    }
+
+    public Optional<Entity> findById(Integer id, Class<Entity> entityClass){
+        try (EntityManager em = emf.createEntityManager()) {
+            Entity entity = em.find(entityClass, id);
+            return Optional.ofNullable(entity);
+        }
+    }
+
+    public List<Entity> findAll(Class<Entity> entityClass){
+        try (EntityManager em = emf.createEntityManager()) {
+            jakarta.persistence.TypedQuery<Entity> query = em.createQuery("SELECT e FROM " + entityClass.getSimpleName() + " e", entityClass);
+            return query.getResultList();
         }
     }
 }
