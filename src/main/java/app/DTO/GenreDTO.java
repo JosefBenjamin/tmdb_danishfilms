@@ -1,12 +1,16 @@
 package app.DTO;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Set;
 
 public record GenreDTO(
+    @JsonProperty("id")
     Integer id,
-    String genreName,
-    Set<Integer> movieIds
-) implements DTO {
+
+    @JsonProperty("name")
+    String genreName)
+        implements DTO {
     @Override
     public Integer getId() {
         return id;
