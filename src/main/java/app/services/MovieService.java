@@ -7,10 +7,12 @@ import app.entities.Actor;
 import app.entities.Director;
 import app.entities.Genre;
 import app.config.HibernateConfig;
+import app.exceptions.ApiException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,6 +21,7 @@ public class MovieService implements Service<MovieDTO, Integer> {
 
     private final MovieDAO movieDAO;
     private final EntityManagerFactory emf;
+    ApiException apiExc;
 
     public MovieService() {
         // Use HibernateConfig to get EntityManagerFactory
@@ -61,8 +64,8 @@ public class MovieService implements Service<MovieDTO, Integer> {
             return movieDAO.findAll().stream()
                     .map(this::convertToDTO)
                     .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw MovieException.databaseError("retrieve all movies: " + e.getMessage());
+        } catch (RuntimeException e) {
+            throw apiExc.serverError("could not retrieve all movies: " + e.getMessage());
         }
     }
 
@@ -70,23 +73,21 @@ public class MovieService implements Service<MovieDTO, Integer> {
      * Finds movie by ID and converts to DTO
      * @param id The movie ID
      * @return MovieDTO object
-     * @throws MovieException if movie not found
      */
     public MovieDTO getMovieById(Integer id) {
         if (id == null || id <= 0) {
-            throw MovieException.invalidTitle("Movie ID cannot be null or negative");
+            throw apiExc.badRequest("Movie ID cannot be null or negative");
         }
 
         return movieDAO.findById(id)
                 .map(this::convertToDTO)
-                .orElseThrow(() -> MovieException.notFound(id));
+                .orElseThrow(() -> apiExc.notFound("Movie could not be found with ID: " + id));
     }
 
     /**
      * Saves a new movie
      * @param movieDTO The movie data to persist
      * @return Saved MovieDTO
-     * @throws MovieException for validation or database errors
      */
     public MovieDTO saveMovie(MovieDTO movieDTO) {
         validateMovieDTO(movieDTO);
@@ -95,8 +96,8 @@ public class MovieService implements Service<MovieDTO, Integer> {
             Movie movie = convertToEntity(movieDTO);
             Movie savedMovie = movieDAO.persist(movie);
             return convertToDTO(savedMovie);
-        } catch (Exception e) {
-            throw MovieException.databaseError("persist movie: " + e.getMessage());
+        } catch (RuntimeException e) {
+            throw apiExc.serverError("could not persist movie: " + e.getMessage());
         }
     }
 
@@ -104,46 +105,44 @@ public class MovieService implements Service<MovieDTO, Integer> {
      * Updates an existing movie
      * @param movieDTO The movie data to update
      * @return Updated MovieDTO
-     * @throws MovieException if movie not found or validation fails
      */
     public MovieDTO updateMovie(MovieDTO movieDTO) {
         if (movieDTO.id() == null) {
-            throw MovieException.invalidTitle("Movie ID is required for update");
+            throw apiExc.badRequest("Movie ID is required for update");
         }
 
         validateMovieDTO(movieDTO);
 
         // Check if movie exists
         if (movieDAO.findById(movieDTO.id()).isEmpty()) {
-            throw MovieException.notFound(movieDTO.id());
+            throw apiExc.notFound("Movie could not be found with ID: " + movieDTO.id());
         }
 
         try {
             Movie movie = convertToEntity(movieDTO);
             Movie updatedMovie = movieDAO.update(movie);
             return convertToDTO(updatedMovie);
-        } catch (Exception e) {
-            throw MovieException.databaseError("update movie: " + e.getMessage());
+        } catch (RuntimeException e) {
+            throw apiExc.serverError("could not update movie: " + e.getMessage());
         }
     }
 
     /**
      * Deletes a movie by ID
      * @param id The movie ID to delete
-     * @throws MovieException if movie not found
      */
     public void deleteMovie(Integer id) {
         if (id == null || id <= 0) {
-            throw MovieException.invalidTitle("Movie ID cannot be null or negative");
+            throw apiExc.badRequest("Movie ID cannot be null or negative");
         }
 
         Movie movie = movieDAO.findById(id)
-                .orElseThrow(() -> MovieException.notFound(id));
+                .orElseThrow(() -> apiExc.notFound("Movie not found with ID: " + id));
 
         try {
             movieDAO.delete(movie);
-        } catch (Exception e) {
-            throw MovieException.databaseError("delete movie: " + e.getMessage());
+        } catch (RuntimeException e) {
+            throw apiExc.serverError("could not delete movie: " + e.getMessage());
         }
     }
 
@@ -154,15 +153,15 @@ public class MovieService implements Service<MovieDTO, Integer> {
      */
     public List<MovieDTO> searchMoviesByTitle(String title) {
         if (title == null || title.trim().isEmpty()) {
-            throw MovieException.invalidTitle(title);
+            throw apiExc.badRequest("movie title cannot be null" + title);
         }
 
         try {
             return movieDAO.findByTitle(title).stream()
                     .map(this::convertToDTO)
                     .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw MovieException.databaseError("search movies by title: " + e.getMessage());
+        } catch (RuntimeException e) {
+            throw apiExc.notFound("search movies by title: " + e.getMessage());
         }
     }
 
@@ -173,15 +172,15 @@ public class MovieService implements Service<MovieDTO, Integer> {
      */
     public List<MovieDTO> getMoviesByDirector(Integer directorId) {
         if (directorId == null || directorId <= 0) {
-            throw MovieException.noDirectorAssigned(directorId);
+            throw apiExc.badRequest("director cannot be null" + directorId);
         }
 
         try {
             return movieDAO.findByDirectorId(directorId).stream()
                     .map(this::convertToDTO)
                     .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw MovieException.databaseError("get movies by director: " + e.getMessage());
+        } catch (RuntimeException e) {
+            throw apiExc.notFound("could not get movies by director: " + e.getMessage());
         }
     }
 
@@ -225,62 +224,65 @@ public class MovieService implements Service<MovieDTO, Integer> {
             movie.setReleaseYear(movieDTO.releaseYear());
             movie.setOriginalLanguage(movieDTO.originalLanguage());
 
-            // Fetch and set genres if provided
+            // Genres
             if (movieDTO.genreIds() != null && !movieDTO.genreIds().isEmpty()) {
-                Set<Genre> genres = new java.util.HashSet<>();
+                Set<Genre> genres = new HashSet<>();
                 for (Integer genreId : movieDTO.genreIds()) {
                     Genre genre = em.find(Genre.class, genreId);
-                    if (genre != null) {
-                        genres.add(genre);
+                    if (genre == null) {
+                        throw ApiException.notFound("Genre with id " + genreId + " not found");
                     }
+                    genres.add(genre);
                 }
                 movie.setGenres(genres);
             }
 
-            // Fetch and set actors if provided
+            // Actors
             if (movieDTO.actorIds() != null && !movieDTO.actorIds().isEmpty()) {
-                Set<Actor> actors = new java.util.HashSet<>();
+                Set<Actor> actors = new HashSet<>();
                 for (Integer actorId : movieDTO.actorIds()) {
                     Actor actor = em.find(Actor.class, actorId);
-                    if (actor != null) {
-                        actors.add(actor);
+                    if (actor == null) {
+                        throw ApiException.notFound("Actor with id " + actorId + " not found");
                     }
+                    actors.add(actor);
                 }
                 movie.setActors(actors);
             }
 
-            // Fetch and set director if provided
+            // Director
             if (movieDTO.directorId() != null) {
                 Director director = em.find(Director.class, movieDTO.directorId());
-                if (director != null) {
-                    movie.setDirector(director);
+                if (director == null) {
+                    throw ApiException.notFound("Director with id " + movieDTO.directorId() + " not found");
                 }
+                movie.setDirector(director);
             }
 
             return movie;
-        } catch (Exception e) {
-            throw MovieException.databaseError("convert DTO to entity: " + e.getMessage());
+        } catch (RuntimeException e) {
+            throw ApiException.serverError("convert DTO to entity failed: " + e.getMessage());
         }
     }
+
 
     /**
      * Validates MovieDTO data
      * @param movieDTO The MovieDTO to validate
-     * @throws MovieException for validation errors
      */
     private void validateMovieDTO(MovieDTO movieDTO) {
         if (movieDTO == null) {
-            throw MovieException.invalidTitle("Movie data cannot be null");
+            throw apiExc.badRequest("Movie data cannot be null");
         }
 
         if (movieDTO.title() == null || movieDTO.title().trim().isEmpty()) {
-            throw MovieException.invalidTitle(movieDTO.title());
+            throw apiExc.badRequest("Movie title cannot be null or empty");
         }
 
         if (movieDTO.releaseYear() != null) {
             int year = movieDTO.releaseYear();
             if (year < 1888 || year > LocalDate.now().getYear() + 10) {
-                throw MovieException.invalidReleaseYear(year);
+                throw apiExc.badRequest("Invalid release year: " + year);
             }
         }
     }
