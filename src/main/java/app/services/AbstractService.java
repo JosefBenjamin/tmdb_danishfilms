@@ -1,6 +1,7 @@
 package app.services;
 import java.util.*;
 import app.DAO.*;
+import app.config.HibernateConfig;
 import app.exceptions.ApiException;
 import app.services.*;
 import app.DTO.*;
@@ -14,9 +15,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.URI;
 
-public abstract class AbstractService<DTO, Entity, ID> {
+public abstract class AbstractService<DTO, Entity> {
     private static final String API_URL = "https://api.themoviedb.org/3";
-    private final EntityManagerFactory emf;
+    private static EntityManagerFactory emf;
+    private EntityManager em = emf.createEntityManager();
     private final String apiKey;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
@@ -102,10 +104,9 @@ public abstract class AbstractService<DTO, Entity, ID> {
      * @param entityType The entity type ("movie", "person", "tv", etc.)
      * @param entityId The entity ID
      * @param responseClass The DTO class to deserialize to
-     * @param <T> The DTO type
      * @return The entity as DTO or null if not found
      */
-    protected <T> T getEntityById(String entityType, int entityId, Class<T> responseClass) {
+    protected Entity getEntityById(String entityType, int entityId, Class<Entity> responseClass) {
         return makeApiRequest("/" + entityType + "/" + entityId, responseClass);
     }
 
@@ -145,15 +146,6 @@ public abstract class AbstractService<DTO, Entity, ID> {
             e.printStackTrace();
             return new ArrayList<>();
         }
-    }
-
-    /**
-     * Get movie by ID from external API
-     * @param movieId The movie ID
-     * @return MovieDTO object or null if not found
-     */
-    protected MovieDTO getMovieById(int movieId) {
-        return getEntityById("movie", movieId, MovieDTO.class);
     }
 
     /**
@@ -200,8 +192,7 @@ public abstract class AbstractService<DTO, Entity, ID> {
         } else return result;
     }
 
-    public Record convertToDTO(Entity entity)
-    {
+    public Record convertToDTO(Entity entity) {
         Record result = null;
         if (entity.getClass() == Actor.class){
             result = (ActorDTO) new ActorDTO(
@@ -237,23 +228,26 @@ public abstract class AbstractService<DTO, Entity, ID> {
         } else return result;
     }
 
-    public  BaseEntity saveEntity(Entity entity) {
+    public BaseEntity saveEntity(Entity entity) {
         BaseEntity result = null;
                 try (EntityManager em = emf.createEntityManager()) {
                     em.getTransaction().begin();
                     try {
                         em.persist(entity);
                         em.getTransaction().commit();
+
                         if ( entity instanceof Actor){
                             result = new Actor().builder()
                                     .id(((Actor) entity).getId())
                                     .name(((Actor) entity).getName())
                                     .build();
+
                         } else if ( entity instanceof Director){
                             result = new Director().builder()
                                     .id(((Director) entity).getId())
                                     .name(((Director) entity).getName())
                                     .build();
+
                         } else if ( entity instanceof Movie){
                             result = new Movie().builder()
                                     .id(((Movie) entity).getId())
@@ -261,6 +255,7 @@ public abstract class AbstractService<DTO, Entity, ID> {
                                     .releaseYear(((Movie) entity).getReleaseYear())
                                     .originalLanguage(((Movie) entity).getOriginalLanguage())
                                     .build();
+
                         } else if ( entity instanceof Genre){
                             result = new Genre().builder()
                                     .id(((Genre) entity).getId())
@@ -275,6 +270,112 @@ public abstract class AbstractService<DTO, Entity, ID> {
                 }
          catch (Exception e) {
             throw ApiException.serverError("Could not save entity: " + e.getMessage());
+        }
+    }
+
+    public BaseEntity updateEntity(Entity entity) {
+        BaseEntity result = null;
+                try (EntityManager em = emf.createEntityManager()) {
+                    em.getTransaction().begin();
+                    try {
+                        BaseEntity updated = (BaseEntity) em.merge(entity);
+                        em.getTransaction().commit();
+
+                        if ( entity instanceof Actor){
+                            result = new Actor().builder()
+                                    .id(((Actor) updated).getId())
+                                    .name(((Actor) updated).getName())
+                                    .build();
+
+                        } else if ( entity instanceof Director){
+                            result = new Director().builder()
+                                    .id(((Director) updated).getId())
+                                    .name(((Director) updated).getName())
+                                    .build();
+
+                        } else if ( entity instanceof Movie){
+                            result = new Movie().builder()
+                                    .id(((Movie) updated).getId())
+                                    .title(((Movie) updated).getTitle())
+                                    .releaseYear(((Movie) updated).getReleaseYear())
+                                    .originalLanguage(((Movie) updated).getOriginalLanguage())
+                                    .build();
+
+                        } else if ( entity instanceof Genre){
+                            result = new Genre().builder()
+                                    .id(((Genre) updated).getId())
+                                    .genreName(((Genre) updated).getGenreName())
+                                    .build();
+                        }
+                        return result;
+                    } catch (Exception e) {
+                        em.getTransaction().rollback();
+                        throw e;
+                    }
+                }
+         catch (Exception e) {
+            throw ApiException.serverError("Could not update entity: " + e.getMessage());
+        }
+    }
+
+    public void delete(Entity entity){
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+                if(entity instanceof Actor){
+                    try {
+                        Actor managedActor = em.find(Actor.class,entity);
+                        if (managedActor != null) {
+                            em.remove(managedActor);
+                        }
+                        em.getTransaction().commit();
+                    } catch (Exception e) {
+                        em.getTransaction().rollback();
+                        throw e;
+                    }
+                } else if (entity instanceof Director){
+                    try {
+                        Director managedDirector = em.find(Director.class,entity);
+                        if (managedDirector != null) {
+                            em.remove(managedDirector);
+                        }
+                        em.getTransaction().commit();
+                    } catch (Exception e) {
+                        em.getTransaction().rollback();
+                        throw e;
+                    }
+                } else if (entity instanceof Genre){
+                    try {
+                        Genre managedGenre = em.find(Genre.class,entity);
+                        if (managedGenre != null) {
+                            em.remove(managedGenre);
+                        }
+                        em.getTransaction().commit();
+                    } catch (Exception e) {
+                        em.getTransaction().rollback();
+                        throw e;
+                    }
+                } else if (entity instanceof Movie){
+                    try {
+                        Movie managedMovie = em.find(Movie.class,entity);
+                        if (managedMovie != null) {
+                            em.remove(managedMovie);
+                        }
+                        em.getTransaction().commit();
+                    } catch (Exception e) {
+                        em.getTransaction().rollback();
+                        throw e;
+                    }
+                }
+
+                BaseEntity managedEntity = (BaseEntity) em.find(entity.getClass(), ((BaseEntity) entity).getId());
+                if (managedEntity != null) {
+                    em.remove(managedEntity);
+                }
+                em.getTransaction().commit();
+
+        } catch (Exception e) {
+            em.getTransaction().rollback();
+            throw ApiException.serverError("Could not delete entity: " + e.getMessage());
         }
     }
 }

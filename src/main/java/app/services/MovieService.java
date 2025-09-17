@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class MovieService implements Service<MovieDTO, Integer> {
+public class MovieService extends AbstractService<MovieDTO, Integer> {
 
     private final MovieDAO movieDAO;
     private final EntityManagerFactory emf;
@@ -207,55 +207,55 @@ public class MovieService implements Service<MovieDTO, Integer> {
      * Converts MovieDTO to Movie entity
      * @param movieDTO The MovieDTO
      * @return Movie entity
-     */
-    private Movie convertToEntity(MovieDTO movieDTO) {
-        try (EntityManager em = emf.createEntityManager()) {
-            Movie movie = new Movie();
-            movie.setId(movieDTO.id());
-            movie.setTitle(movieDTO.title());
-            movie.setReleaseYear(movieDTO.releaseYear());
-            movie.setOriginalLanguage(movieDTO.originalLanguage());
-
-            // Genres
-            if (movieDTO.genreIds() != null && !movieDTO.genreIds().isEmpty()) {
-                Set<Genre> genres = new HashSet<>();
-                for (Integer genreId : movieDTO.genreIds()) {
-                    Genre genre = em.find(Genre.class, genreId);
-                    if (genre == null) {
-                        throw ApiException.notFound("Genre with id " + genreId + " not found");
-                    }
-                    genres.add(genre);
-                }
-                movie.setGenres(genres);
-            }
-
-//            // Actors
-//            if (movieDTO.actorIds() != null && !movieDTO.actorIds().isEmpty()) {
-//                Set<Actor> actors = new HashSet<>();
-//                for (Integer actorId : movieDTO.actorIds()) {
-//                    Actor actor = em.find(Actor.class, actorId);
-//                    if (actor == null) {
-//                        throw ApiException.notFound("Actor with id " + actorId + " not found");
+//     */
+//    private Movie convertToEntity(MovieDTO movieDTO) {
+//        try (EntityManager em = emf.createEntityManager()) {
+//            Movie movie = new Movie();
+//            movie.setId(movieDTO.id());
+//            movie.setTitle(movieDTO.title());
+//            movie.setReleaseYear(movieDTO.releaseYear());
+//            movie.setOriginalLanguage(movieDTO.originalLanguage());
+//
+//            // Genres
+//            if (movieDTO.genreIds() != null && !movieDTO.genreIds().isEmpty()) {
+//                Set<Genre> genres = new HashSet<>();
+//                for (Integer genreId : movieDTO.genreIds()) {
+//                    Genre genre = em.find(Genre.class, genreId);
+//                    if (genre == null) {
+//                        throw ApiException.notFound("Genre with id " + genreId + " not found");
 //                    }
-//                    actors.add(actor);
+//                    genres.add(genre);
 //                }
-//                movie.setActors(actors);
+//                movie.setGenres(genres);
 //            }
 //
-//            // Director
-//            if (movieDTO.directorId() != null) {
-//                Director director = em.find(Director.class, movieDTO.directorId());
-//                if (director == null) {
-//                    throw ApiException.notFound("Director with id " + movieDTO.directorId() + " not found");
-//                }
-//                movie.setDirector(director);
-//            }
-
-            return movie;
-        } catch (RuntimeException e) {
-            throw ApiException.serverError("convert DTO to entity failed: " + e.getMessage());
-        }
-    }
+////            // Actors
+////            if (movieDTO.actorIds() != null && !movieDTO.actorIds().isEmpty()) {
+////                Set<Actor> actors = new HashSet<>();
+////                for (Integer actorId : movieDTO.actorIds()) {
+////                    Actor actor = em.find(Actor.class, actorId);
+////                    if (actor == null) {
+////                        throw ApiException.notFound("Actor with id " + actorId + " not found");
+////                    }
+////                    actors.add(actor);
+////                }
+////                movie.setActors(actors);
+////            }
+////
+////            // Director
+////            if (movieDTO.directorId() != null) {
+////                Director director = em.find(Director.class, movieDTO.directorId());
+////                if (director == null) {
+////                    throw ApiException.notFound("Director with id " + movieDTO.directorId() + " not found");
+////                }
+////                movie.setDirector(director);
+////            }
+//
+//            return movie;
+//        } catch (RuntimeException e) {
+//            throw ApiException.serverError("convert DTO to entity failed: " + e.getMessage());
+//        }
+//    }
 
 
     /**
