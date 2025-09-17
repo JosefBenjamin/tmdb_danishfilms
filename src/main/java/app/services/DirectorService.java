@@ -5,45 +5,56 @@ import app.DTO.DirectorDTO;
 import app.entities.Director;
 import app.entities.Actor;
 import app.config.HibernateConfig;
+import app.entities.Genre;
 import app.exceptions.ApiException;
+import jakarta.persistence.EntityManagerFactory;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class DirectorService implements Service<DirectorDTO, Integer> {
+public class DirectorService extends AbstractService<DirectorDTO, Director> {
 
     private final DirectorDAO directorDAO;
     ApiException apiExc;
 
-    public DirectorService() {
+    public DirectorService(EntityManagerFactory emf) {
+        super(emf);
         this.directorDAO = new DirectorDAO(HibernateConfig.getEntityManagerFactory());
     }
 
-    // Implementation of Service interface methods
-    @Override
-    public List<DirectorDTO> getAll() {
-        return getAllDirectors();
+//    // Implementation of Service interface methods
+//    public List<DirectorDTO> getAll() {
+//        return getAllDirectors();
+//    }
+
+    public List<Director> getAll() {
+        return findAll(Director.class);
     }
 
-    @Override
-    public DirectorDTO getById(Integer id) {
-        return getDirectorById(id);
+    public Optional<Director> getById(Integer id) {
+        return findById(id, Director.class);
     }
 
-    @Override
     public DirectorDTO save(DirectorDTO dto) {
         return saveDirector(dto);
     }
 
-    @Override
-    public DirectorDTO update(DirectorDTO dto) {
-        return updateDirector(dto);
+    public Director update(Director entity) {
+        return (Director) updateEntity(entity);
     }
 
-    @Override
-    public void delete(Integer id) {
-        deleteDirector(id);
+    public void delete(Director entity) {
+        delete(entity);
+    }
+
+    public List<Director> findAll() {
+        try {
+            return findAll(Director.class);
+        } catch (Exception e) {
+            throw apiExc.serverError("Cannot retrieve all genres: " + e.getMessage());
+        }
     }
 
     /**
@@ -145,12 +156,16 @@ public class DirectorService implements Service<DirectorDTO, Integer> {
      * @param director The Director entity
      * @return DirectorDTO object
      */
-    private DirectorDTO convertToDTO(Director director) {
+    public DirectorDTO convertToDTO(Director director) {
         Set<Integer> actorIds = director.getActors().stream()
                 .map(Actor::getId)
                 .collect(Collectors.toSet());
 
-        return null;
+        return new DirectorDTO(
+            director.getId(),
+            director.getName(),
+            director.getJob() != null ? director.getJob() : "Directing"
+        );
     }
 
     /**
@@ -158,11 +173,12 @@ public class DirectorService implements Service<DirectorDTO, Integer> {
      * @param directorDTO The DirectorDTO
      * @return Director entity
      */
-    private Director convertToEntity(DirectorDTO directorDTO) {
-        Director director = new Director();
-        director.setId(directorDTO.id());
-        director.setName(directorDTO.name());
-        return director;
+    public Director convertToEntity(DirectorDTO directorDTO) {
+//        Director director = new Director();
+//        director.setId(directorDTO.id());
+//        director.setName(directorDTO.name());
+//        return director;
+        return super.convertToEntity(directorDTO);
     }
 
     /**

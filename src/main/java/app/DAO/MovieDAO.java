@@ -1,5 +1,6 @@
 package app.DAO;
 
+import app.DTO.MovieDTO;
 import app.entities.Movie;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -31,7 +32,6 @@ public class MovieDAO implements IDAO<Movie, Integer> {
         }
     }
 
-    @Override
     public Movie persist(Movie entity) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
@@ -46,7 +46,6 @@ public class MovieDAO implements IDAO<Movie, Integer> {
         }
     }
 
-    @Override
     public Movie update(Movie entity) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
@@ -61,7 +60,6 @@ public class MovieDAO implements IDAO<Movie, Integer> {
         }
     }
 
-    @Override
     public void delete(Movie entity) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();

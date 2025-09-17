@@ -4,7 +4,7 @@ package app.entities;
  * Base interface for all Entity classes
  * Provides common contract for all entity implementations
  */
-public abstract class BaseEntity {
+public interface BaseEntity <ID> {
     /**
      * Gets the unique identifier for this entity
      * @return the ID of the entity
@@ -15,5 +15,5 @@ public abstract class BaseEntity {
      * Sets the unique identifier for this entity
      * @param id the ID to set
      */
-    public abstract void setId(Integer id);
+    public abstract void setId(ID id);
 }

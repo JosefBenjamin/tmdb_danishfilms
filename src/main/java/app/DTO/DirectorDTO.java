@@ -14,11 +14,4 @@ public record DirectorDTO(
     @JsonProperty("job")
     String job
 
-) implements DTO {
-    @Override
-    public Integer getId() {
-        return id;
-    }
-
-
-}
+) {}

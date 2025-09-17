@@ -19,9 +19,9 @@ public class Main {
         HibernateConfig.getEntityManagerFactory().close();
 
         ActorDTO test = new ActorDTO(1, "John Doe", "Director");
-        AbstractService abstractService = new AbstractService() {
+            AbstractService abstractService = new AbstractService(HibernateConfig.getEntityManagerFactory()) {
         };
-        Actor convertedActor = (Actor) abstractService.convertToEntity(test, ActorDTO.class);
+        Actor convertedActor = (Actor) abstractService.convertToEntity(test);
         System.out.println("Converted Actor ID (DTO): " + test.name());
         System.out.println("Converted Actor Name (Entity): " + convertedActor.getName());
 

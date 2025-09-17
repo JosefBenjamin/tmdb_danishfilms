@@ -20,9 +20,4 @@ public record MovieDTO(
     @JsonProperty("genre_ids")
     Set<Integer> genreIds
 
-) implements DTO {
-    @Override
-    public Integer getId() {
-        return id;
-    }
-}
+){ }

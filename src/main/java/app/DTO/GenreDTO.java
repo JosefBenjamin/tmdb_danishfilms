@@ -10,9 +10,4 @@ public record GenreDTO(
 
     @JsonProperty("name")
     String genreName)
-        implements DTO {
-    @Override
-    public Integer getId() {
-        return id;
-    }
-}
+         {}

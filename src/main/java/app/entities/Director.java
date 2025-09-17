@@ -15,7 +15,7 @@ import java.util.ArrayList;
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true) //only uses id for equality
 @ToString(exclude = {"actors", "movies"}) // avoids recursion
-public class Director extends BaseEntity {
+public class Director implements BaseEntity<Integer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,6 +26,7 @@ public class Director extends BaseEntity {
     private String name;
     private int age;
 
+    private String job;
     @ManyToMany(mappedBy = "directors")
     @Builder.Default
     private Set<Actor> actors = new HashSet<>();
