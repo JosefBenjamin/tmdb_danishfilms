@@ -12,15 +12,17 @@ import java.util.ArrayList;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true) //only uses id for equality
 @ToString(exclude = {"actors", "movies"}) // avoids recursion
-public class Director implements BaseEntity {
+public class Director extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include  // only id is used
     private Integer id;
 
+    @Setter
     private String name;
     private int age;
 

@@ -157,9 +157,7 @@ public class ActorService implements Service<ActorDTO, Integer> {
 
         return new ActorDTO(
             actor.getId(),
-            actor.getName(),
-            actor.getAge(),
-            directorIds
+            actor.getName()
         );
     }
 
