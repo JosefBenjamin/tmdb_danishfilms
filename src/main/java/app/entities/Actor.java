@@ -8,8 +8,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "actors")
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Actor implements BaseEntity {

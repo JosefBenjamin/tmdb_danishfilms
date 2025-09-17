@@ -7,7 +7,7 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-public class ActorDAO implements DAO<Actor, Integer> {
+public class ActorDAO implements IDAO<Actor, Integer> {
 
     private final EntityManagerFactory emf;
 
@@ -32,7 +32,7 @@ public class ActorDAO implements DAO<Actor, Integer> {
     }
 
     @Override
-    public Actor save(Actor entity) {
+    public Actor persist(Actor entity) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {

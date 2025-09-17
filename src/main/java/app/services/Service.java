@@ -24,7 +24,7 @@ public interface Service<T, ID> {
 
     /**
      * Saves a new entity
-     * @param dto the DTO to save
+     * @param dto the DTO to persist
      * @return the saved DTO
      */
     T save(T dto);

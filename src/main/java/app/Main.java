@@ -1,8 +1,5 @@
 package app;
 import app.DAO.*;
-import app.DTO.*;
-import app.services.*;
-import app.utils.*;
 import app.config.*;
 import app.entities.*;
 
@@ -15,7 +12,7 @@ public class Main {
         actor.setName("John Doe");
         actor.setAge(30);
 
-        Actor savedActor = actorDAO.save(actor);
+        Actor savedActor = actorDAO.persist(actor);
         System.out.println("Saved Actor ID: " + savedActor.getId());
 
         HibernateConfig.getEntityManagerFactory().close();

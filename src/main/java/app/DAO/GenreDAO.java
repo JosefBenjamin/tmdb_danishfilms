@@ -7,7 +7,7 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-public class GenreDAO implements DAO<Genre, Integer> {
+public class GenreDAO implements IDAO<Genre, Integer> {
 
     private final EntityManagerFactory emf;
 
@@ -32,7 +32,7 @@ public class GenreDAO implements DAO<Genre, Integer> {
     }
 
     @Override
-    public Genre save(Genre entity) {
+    public Genre persist(Genre entity) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {

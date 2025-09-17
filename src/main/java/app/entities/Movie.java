@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,9 +20,10 @@ public class Movie implements BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
+
     private String title;
-    private Integer releaseYear;
+    private int releaseYear;
     private String originalLanguage;
 
     // Many-to-Many relationship with Genre (Movie can have multiple genres)
@@ -31,6 +31,7 @@ public class Movie implements BaseEntity {
     @JoinTable(name = "movies_and_genres",
         joinColumns = @JoinColumn(name = "movie_id"),
         inverseJoinColumns = @JoinColumn(name = "genre_id"))
+    @Builder.Default
     private Set<Genre> genres = new HashSet<>();
 
     // Many-to-Many relationship with Actor (Movie can have multiple actors)
@@ -38,6 +39,7 @@ public class Movie implements BaseEntity {
     @JoinTable(name = "movies_and_actors",
             joinColumns = @JoinColumn(name = "movie_id"),
             inverseJoinColumns = @JoinColumn(name = "actor_id"))
+    @Builder.Default
     private Set<Actor> actors = new HashSet<>();
 
     // Many-to-One relationship with Director (Movie has one director)
@@ -92,4 +94,5 @@ public class Movie implements BaseEntity {
             director.getMovies().add(this);
         }
     }
+
 }
