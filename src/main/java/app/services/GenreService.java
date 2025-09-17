@@ -218,10 +218,6 @@ public class GenreService extends AbstractService<GenreDTO, Genre> {
         }
     }
 
-    // Implementation of Service interface methods
-    public List<GenreDTO> getAll() {
-        return getAllGenres();
-    }
 
     public GenreDTO getById(Integer id) {
         return getGenreById(id);
@@ -239,13 +235,4 @@ public class GenreService extends AbstractService<GenreDTO, Genre> {
         deleteGenre(id);
     }
 
-    // Example usage method - can be removed in production
-    public void demonstrateUsage() {
-        List<GenreDTO> allGenres = getAllGenres();
-        System.out.println("Found " + allGenres.size() + " genres:");
-
-        for (GenreDTO genre : allGenres) {
-            //System.out.println("- " + genre.genreName() + " (Movies: " + genre.movieIds().size() + ")");
-        }
-    }
 }

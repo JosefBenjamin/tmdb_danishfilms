@@ -267,48 +267,25 @@ public abstract class AbstractService<DTO, Entity> {
      * @param entity The entity to update
      * @return The updated entity
      */
-    public BaseEntity updateEntity(Entity entity) {
-        BaseEntity result = null;
-                try (EntityManager em = emf.createEntityManager()) {
-                    em.getTransaction().begin();
-                    try {
-                        BaseEntity updated = (BaseEntity) em.merge(entity);
-                        em.getTransaction().commit();
+    public Object updateEntity(Entity entity) {
+        if (entity instanceof Movie){
+            MovieDAO dao = new MovieDAO(emf);
+            return dao.update((Movie) entity);
 
-                        if ( entity instanceof Actor){
-                            result = new Actor().builder()
-                                    .id(((Actor) updated).getId())
-                                    .name(((Actor) updated).getName())
-                                    .build();
+        } else if (entity instanceof Actor){
+            ActorDAO dao = new ActorDAO(emf);
+            return dao.update((Actor) entity);
 
-                        } else if ( entity instanceof Director){
-                            result = new Director().builder()
-                                    .id(((Director) updated).getId())
-                                    .name(((Director) updated).getName())
-                                    .build();
+        } else if (entity instanceof Director) {
+            DirectorDAO dao = new DirectorDAO(emf);
+            return dao.update((Director) entity);
 
-                        } else if ( entity instanceof Movie){
-                            result = new Movie().builder()
-                                    .id(((Movie) updated).getId())
-                                    .title(((Movie) updated).getTitle())
-                                    .releaseYear(((Movie) updated).getReleaseYear())
-                                    .originalLanguage(((Movie) updated).getOriginalLanguage())
-                                    .build();
+        } else if (entity instanceof Genre) {
+            GenreDAO dao = new GenreDAO(emf);
+            return dao.update((Genre) entity);
 
-                        } else if ( entity instanceof Genre){
-                            result = new Genre().builder()
-                                    .id(((Genre) updated).getId())
-                                    .genreName(((Genre) updated).getGenreName())
-                                    .build();
-                        }
-                        return result;
-                    } catch (Exception e) {
-                        em.getTransaction().rollback();
-                        throw e;
-                    }
-                }
-         catch (Exception e) {
-            throw ApiException.serverError("Could not update entity: " + e.getMessage());
+        } else {
+            throw apiExc.badRequest("Unsupported entity type for update");
         }
     }
 
