@@ -4,6 +4,7 @@ import app.DAO.IDAO;
 import app.DTO.BaseDTO;
 import app.entities.BaseEntity;
 import app.exceptions.ApiException;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import java.lang.reflect.*;
 import java.util.*;
@@ -48,10 +49,10 @@ public class UniversalDAO<Entity extends BaseEntity<ID>, ID> implements IDAO<Ent
             throw new RuntimeException("Failed to cache reflection data for " + entityName, e);
         }
     }
-
+    
     @Override
     public Optional<Entity> findById(ID id) {
-        try (var em = emf.createEntityManager()) {
+        try (EntityManager em = emf.createEntityManager()) {
             Entity entity = em.find(entityClass, id);
             return Optional.ofNullable(entity);
         }
@@ -59,7 +60,7 @@ public class UniversalDAO<Entity extends BaseEntity<ID>, ID> implements IDAO<Ent
 
     @Override
     public List<Entity> findAll() {
-        try (var em = emf.createEntityManager()) {
+        try (EntityManager em = emf.createEntityManager()) {
             var query = em.createQuery("SELECT e FROM " + entityName + " e", entityClass);
             return query.getResultList();
         }
@@ -67,7 +68,7 @@ public class UniversalDAO<Entity extends BaseEntity<ID>, ID> implements IDAO<Ent
 
     @Override
     public Entity persist(Entity entity) {
-        try (var em = emf.createEntityManager()) {
+        try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {
                 em.persist(entity);
@@ -82,7 +83,7 @@ public class UniversalDAO<Entity extends BaseEntity<ID>, ID> implements IDAO<Ent
 
     @Override
     public Entity update(Entity entity) {
-        try (var em = emf.createEntityManager()) {
+        try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {
                 Entity updated = em.merge(entity);
@@ -97,7 +98,7 @@ public class UniversalDAO<Entity extends BaseEntity<ID>, ID> implements IDAO<Ent
 
     @Override
     public void delete(Entity entity) {
-        try (var em = emf.createEntityManager()) {
+        try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {
                 Entity managedEntity = em.find(entityClass, entity.getId());
@@ -117,7 +118,7 @@ public class UniversalDAO<Entity extends BaseEntity<ID>, ID> implements IDAO<Ent
      * Usage: findByField("name", "John")
      */
     public List<Entity> findByField(String fieldName, Object value) {
-        try (var em = emf.createEntityManager()) {
+        try (EntityManager em = emf.createEntityManager()) {
             String jpql = "SELECT e FROM " + entityName + " e WHERE e." + fieldName + " = :value";
             var query = em.createQuery(jpql, entityClass);
             query.setParameter("value", value);
@@ -130,7 +131,7 @@ public class UniversalDAO<Entity extends BaseEntity<ID>, ID> implements IDAO<Ent
      * Usage: findByFields(Map.of("name", "John", "age", 30))
      */
     public List<Entity> findByFields(Map<String, Object> criteria) {
-        try (var em = emf.createEntityManager()) {
+        try (EntityManager em = emf.createEntityManager()) {
             StringBuilder jpql = new StringBuilder("SELECT e FROM " + entityName + " e WHERE ");
 
             List<String> conditions = new ArrayList<>();

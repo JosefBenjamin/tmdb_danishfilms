@@ -4,13 +4,17 @@ import app.config.*;
 import app.entities.*;
 import app.DTO.*;
 import app.services.*;
+import jakarta.persistence.EntityManagerFactory;
+
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class Main {
 
     public static void main(String[] args) {
         // Get EntityManagerFactory
-        var emf = HibernateConfig.getEntityManagerFactory();
+        EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
 
         // Use ActorService instead of anonymous AbstractService
         ActorService actorService = new ActorService(emf);
@@ -18,20 +22,8 @@ public class Main {
         // Test full CRUD operations
         System.out.println("\n=== Testing ActorService CRUD Operations ===");
 
-
-        // Save using service
-        ActorDTO newActorDTO = new ActorDTO(null, "Jane Smith", "Acting");
-        ActorDTO savedDTO = actorService.save(newActorDTO);
-        System.out.println("Saved Actor via Service: " + savedDTO.name() + " with ID: " + savedDTO.getId());
-
-        // Get by ID
-        var retrievedActor = actorService.getById(savedDTO.getId());
-        if (retrievedActor.isPresent()) {
-            System.out.println("Retrieved Actor: " + retrievedActor.get().name());
-        }
-
         // Get all actors
-        var allActors = actorService.getAll();
+        List<ActorDTO> allActors = actorService.getAll();
         System.out.println("Total actors in database: " + allActors.size());
 
 
