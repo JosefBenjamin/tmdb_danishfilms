@@ -154,10 +154,7 @@ public class ActorService implements Service<ActorDTO, Integer> {
                 .map(director -> director.getId())
                 .collect(Collectors.toSet());
 
-        return new ActorDTO(
-            actor.getId(),
-            actor.getName()
-        );
+        return null;
     }
 
     /**
@@ -169,7 +166,6 @@ public class ActorService implements Service<ActorDTO, Integer> {
         Actor actor = new Actor();
         actor.setId(actorDTO.id() != null ? actorDTO.id().intValue() : null); 
         actor.setName(actorDTO.name());
-        actor.setAge(actorDTO.age());
         // Note: Directors would need to be fetched and set separately if needed
         return actor;
     }
@@ -187,9 +183,7 @@ public class ActorService implements Service<ActorDTO, Integer> {
             throw apiExc.badRequest(actorDTO.name());
         }
 
-        if (actorDTO.age() < 0 || actorDTO.age() > 150) {
-            throw apiExc.badRequest(actorDTO.age());
-        }
+
     }
 
     // Example usage method - can be removed in production
@@ -198,7 +192,7 @@ public class ActorService implements Service<ActorDTO, Integer> {
         System.out.println("Found " + allActors.size() + " actors:");
 
         for (ActorDTO actor : allActors) {
-            System.out.println("- " + actor.name() + " (Age: " + actor.age() + ")");
+            //System.out.println("- " + actor.name() + " (Age: " + actor.age() + ")");
         }
     }
 }

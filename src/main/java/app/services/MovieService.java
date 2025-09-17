@@ -200,15 +200,8 @@ public class MovieService implements Service<MovieDTO, Integer> {
 
         Integer directorId = movie.getDirector() != null ? movie.getDirector().getId() : null;
 
-        return new MovieDTO(
-            movie.getId(),
-            movie.getTitle(),
-            movie.getReleaseYear(),
-            movie.getOriginalLanguage(),
-            genreIds,
-            actorIds,
-            directorId
-        );
+        return null;
+
     }
 
     /**
@@ -237,27 +230,27 @@ public class MovieService implements Service<MovieDTO, Integer> {
                 movie.setGenres(genres);
             }
 
-            // Actors
-            if (movieDTO.actorIds() != null && !movieDTO.actorIds().isEmpty()) {
-                Set<Actor> actors = new HashSet<>();
-                for (Integer actorId : movieDTO.actorIds()) {
-                    Actor actor = em.find(Actor.class, actorId);
-                    if (actor == null) {
-                        throw ApiException.notFound("Actor with id " + actorId + " not found");
-                    }
-                    actors.add(actor);
-                }
-                movie.setActors(actors);
-            }
-
-            // Director
-            if (movieDTO.directorId() != null) {
-                Director director = em.find(Director.class, movieDTO.directorId());
-                if (director == null) {
-                    throw ApiException.notFound("Director with id " + movieDTO.directorId() + " not found");
-                }
-                movie.setDirector(director);
-            }
+//            // Actors
+//            if (movieDTO.actorIds() != null && !movieDTO.actorIds().isEmpty()) {
+//                Set<Actor> actors = new HashSet<>();
+//                for (Integer actorId : movieDTO.actorIds()) {
+//                    Actor actor = em.find(Actor.class, actorId);
+//                    if (actor == null) {
+//                        throw ApiException.notFound("Actor with id " + actorId + " not found");
+//                    }
+//                    actors.add(actor);
+//                }
+//                movie.setActors(actors);
+//            }
+//
+//            // Director
+//            if (movieDTO.directorId() != null) {
+//                Director director = em.find(Director.class, movieDTO.directorId());
+//                if (director == null) {
+//                    throw ApiException.notFound("Director with id " + movieDTO.directorId() + " not found");
+//                }
+//                movie.setDirector(director);
+//            }
 
             return movie;
         } catch (RuntimeException e) {
