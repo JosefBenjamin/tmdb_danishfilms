@@ -24,9 +24,13 @@ public class DirectorService extends AbstractService<DirectorDTO, Director> {
         this.directorDAO = new DirectorDAO(HibernateConfig.getEntityManagerFactory());
     }
 
-    // Implementation of Service interface methods
-    public List<DirectorDTO> getAll() {
-        return getAllDirectors();
+//    // Implementation of Service interface methods
+//    public List<DirectorDTO> getAll() {
+//        return getAllDirectors();
+//    }
+
+    public List<Director> getAll() {
+        return findAll(Director.class);
     }
 
     public Optional<Director> getById(Integer id) {
