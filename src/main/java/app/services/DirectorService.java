@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class DirectorService implements Service<DirectorDTO, Integer> {
 
     private final DirectorDAO directorDAO;
-    ApiException apiExc = new ApiException();
+    ApiException apiExc;
 
     public DirectorService() {
         this.directorDAO = new DirectorDAO(HibernateConfig.getEntityManagerFactory());
@@ -55,8 +55,8 @@ public class DirectorService implements Service<DirectorDTO, Integer> {
             return directorDAO.findAll().stream()
                     .map(this::convertToDTO)
                     .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw DirectorException.databaseError("retrieve all directors: " + e.getMessage());
+        } catch (RuntimeException e) {
+            throw apiExc.serverError("Could not retrieve all directors");
         }
     }
 
@@ -64,23 +64,21 @@ public class DirectorService implements Service<DirectorDTO, Integer> {
      * Finds director by ID and converts to DTO
      * @param id The director ID
      * @return DirectorDTO object
-     * @throws DirectorException if director not found
      */
     public DirectorDTO getDirectorById(Integer id) {
         if (id == null || id <= 0) {
-            throw DirectorException.invalidName("Director ID cannot be null or negative");
+            throw apiExc.badRequest("Director ID cannot be null or negative");
         }
 
         return directorDAO.findById(id)
                 .map(this::convertToDTO)
-                .orElseThrow(() -> DirectorException.notFound(id));
+                .orElseThrow(() -> apiExc.notFound("Director could not be found with ID: " + id));
     }
 
     /**
      * Saves a new director
      * @param directorDTO The director data to persist
      * @return Saved DirectorDTO
-     * @throws DirectorException for validation or database errors
      */
     public DirectorDTO saveDirector(DirectorDTO directorDTO) {
         validateDirectorDTO(directorDTO);
@@ -89,8 +87,8 @@ public class DirectorService implements Service<DirectorDTO, Integer> {
             Director director = convertToEntity(directorDTO);
             Director savedDirector = directorDAO.persist(director);
             return convertToDTO(savedDirector);
-        } catch (Exception e) {
-            throw DirectorException.databaseError("persist director: " + e.getMessage());
+        } catch (RuntimeException e) {
+            throw apiExc.serverError("persist director: " + e.getMessage());
         }
     }
 
@@ -98,49 +96,47 @@ public class DirectorService implements Service<DirectorDTO, Integer> {
      * Updates an existing director
      * @param directorDTO The director data to update
      * @return Updated DirectorDTO
-     * @throws DirectorException if director not found or validation fails
      */
     public DirectorDTO updateDirector(DirectorDTO directorDTO) {
         if (directorDTO.id() == null) {
-            throw DirectorException.invalidName("Director ID is required for update");
+            throw apiExc.badRequest("Director ID is required for update");
         }
 
         validateDirectorDTO(directorDTO);
 
         if (directorDAO.findById(directorDTO.id()).isEmpty()) {
-            throw DirectorException.notFound(directorDTO.id());
+            throw apiExc.notFound("Director could not be found with ID: " + directorDTO.id());
         }
 
         try {
             Director director = convertToEntity(directorDTO);
             Director updatedDirector = directorDAO.update(director);
             return convertToDTO(updatedDirector);
-        } catch (Exception e) {
-            throw DirectorException.databaseError("update director: " + e.getMessage());
+        } catch (RuntimeException e) {
+            throw apiExc.serverError("Could not update director: " + e.getMessage());
         }
     }
 
     /**
      * Deletes a director by ID
      * @param id The director ID to delete
-     * @throws DirectorException if director not found or has associated movies
      */
     public void deleteDirector(Integer id) {
         if (id == null || id <= 0) {
-            throw DirectorException.invalidName("Director ID cannot be null or negative");
+            throw apiExc.badRequest("Director ID cannot be null or negative");
         }
 
         Director director = directorDAO.findById(id)
-                .orElseThrow(() -> DirectorException.notFound(id));
+                .orElseThrow(() -> apiExc.notFound("Director could not be found with ID: " + id));
 
         if (!director.getMovies().isEmpty()) {
-            throw new DirectorException(409, "Cannot delete director with ID " + id + " because they have directed movies");
+            throw apiExc.conflict("Cannot delete director with ID " + id + " because they have directed movies");
         }
 
         try {
             directorDAO.delete(director);
         } catch (Exception e) {
-            throw DirectorException.databaseError("delete director: " + e.getMessage());
+            throw apiExc.serverError("Could not delete director: " + e.getMessage());
         }
     }
 
@@ -178,19 +174,18 @@ public class DirectorService implements Service<DirectorDTO, Integer> {
     /**
      * Validates DirectorDTO data
      * @param directorDTO The DirectorDTO to validate
-     * @throws DirectorException for validation errors
      */
     private void validateDirectorDTO(DirectorDTO directorDTO) {
         if (directorDTO == null) {
-            throw DirectorException.invalidName("Director data cannot be null");
+            throw apiExc.badRequest("Director data cannot be null");
         }
 
         if (directorDTO.name() == null || directorDTO.name().trim().isEmpty()) {
-            throw DirectorException.invalidName(directorDTO.name());
+            throw apiExc.badRequest("Directors name cannot be null");
         }
 
         if (directorDTO.age() < 0 || directorDTO.age() > 150) {
-            throw DirectorException.invalidAge(directorDTO.age());
+            throw apiExc.badRequest("Invalid age, must be between 0-150");
         }
     }
 }

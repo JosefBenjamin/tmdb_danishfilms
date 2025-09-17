@@ -66,7 +66,7 @@ public class ActorService implements Service<ActorDTO, Integer> {
             return actorDAO.findAll().stream()
                     .map(this::convertToDTO)
                     .collect(Collectors.toList());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw apiExc.badRequest("unable to retrieve any actors: " + e.getMessage());
         }
     }
@@ -78,7 +78,7 @@ public class ActorService implements Service<ActorDTO, Integer> {
      */
     public ActorDTO getActorById(Integer id) {
         if (id == null || id <= 0) {
-            throw apiExc.notFound("Actor ID cannot be null or negative");
+            throw apiExc.badRequest("Actor ID cannot be null or negative");
         }
         return actorDAO.findById(id)
                 .map(this::convertToDTO)
@@ -98,7 +98,7 @@ public class ActorService implements Service<ActorDTO, Integer> {
             Actor savedActor = actorDAO.persist(actor);
             return convertToDTO(savedActor);
         } catch (Exception e) {
-            throw apiExc.
+            throw apiExc.alreadyExists("Actor already exists");
         }
     }
 
@@ -120,7 +120,7 @@ public class ActorService implements Service<ActorDTO, Integer> {
             Actor actor = convertToEntity(actorDTO);
             Actor updatedActor = actorDAO.update(actor);
             return convertToDTO(updatedActor);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw apiExc.serverError("update actor: /n" + e.getMessage());
         }
     }
@@ -128,20 +128,19 @@ public class ActorService implements Service<ActorDTO, Integer> {
     /**
      * Deletes an actor by ID
      * @param id The actor ID to delete
-     * @throws ActorException if actor not found
      */
     public void deleteActor(Integer id) {
         if (id == null || id <= 0) {
-            throw ActorException.invalidName("Actor ID cannot be null or negative");
+            throw apiExc.badRequest("Actor ID cannot be null or negative");
         }
 
         Actor actor = actorDAO.findById(id)
-                .orElseThrow(() -> ActorException.notFound(id));
+                .orElseThrow(() -> apiExc.notFound("Actor not found with ID: " + id));
 
         try {
             actorDAO.delete(actor);
-        } catch (Exception e) {
-            throw ActorException.databaseError("delete actor: " + e.getMessage());
+        } catch (RuntimeException e) {
+            throw apiExc.serverError("Could not delete actor with ID: " + id);
         }
     }
 
@@ -180,19 +179,18 @@ public class ActorService implements Service<ActorDTO, Integer> {
     /**
      * Validates ActorDTO data
      * @param actorDTO The ActorDTO to validate
-     * @throws ActorException for validation errors
      */
     private void validateActorDTO(ActorDTO actorDTO) {
         if (actorDTO == null) {
-            throw ActorException.invalidName("Actor data cannot be null");
+            throw apiExc.badRequest("Actor data cannot be null");
         }
 
         if (actorDTO.name() == null || actorDTO.name().trim().isEmpty()) {
-            throw ActorException.invalidName(actorDTO.name());
+            throw apiExc.badRequest(actorDTO.name());
         }
 
         if (actorDTO.age() < 0 || actorDTO.age() > 150) {
-            throw ActorException.invalidAge(actorDTO.age());
+            throw apiExc.badRequest(actorDTO.age());
         }
     }
 
