@@ -150,12 +150,7 @@ public class DirectorService implements Service<DirectorDTO, Integer> {
                 .map(Actor::getId)
                 .collect(Collectors.toSet());
 
-        return new DirectorDTO(
-            director.getId(),
-            director.getName(),
-            director.getAge(),
-            actorIds
-        );
+        return null;
     }
 
     /**
@@ -167,7 +162,6 @@ public class DirectorService implements Service<DirectorDTO, Integer> {
         Director director = new Director();
         director.setId(directorDTO.id());
         director.setName(directorDTO.name());
-        director.setAge(directorDTO.age());
         return director;
     }
 
@@ -184,8 +178,6 @@ public class DirectorService implements Service<DirectorDTO, Integer> {
             throw apiExc.badRequest("Directors name cannot be null");
         }
 
-        if (directorDTO.age() < 0 || directorDTO.age() > 150) {
-            throw apiExc.badRequest("Invalid age, must be between 0-150");
-        }
+
     }
 }

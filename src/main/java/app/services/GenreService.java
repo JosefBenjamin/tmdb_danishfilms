@@ -187,8 +187,7 @@ public class GenreService implements Service<GenreDTO, Integer> {
 
         return new GenreDTO(
             genre.getId(),
-            genre.getGenreName(),
-            movieIds
+            genre.getGenreName()
         );
     }
 
@@ -251,7 +250,7 @@ public class GenreService implements Service<GenreDTO, Integer> {
         System.out.println("Found " + allGenres.size() + " genres:");
 
         for (GenreDTO genre : allGenres) {
-            System.out.println("- " + genre.genreName() + " (Movies: " + genre.movieIds().size() + ")");
+            //System.out.println("- " + genre.genreName() + " (Movies: " + genre.movieIds().size() + ")");
         }
     }
 }
