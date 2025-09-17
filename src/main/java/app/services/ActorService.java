@@ -48,10 +48,9 @@ public class ActorService extends AbstractService<ActorDTO, Actor> {
 //        return result;
 //    }
 
-//    @Override
-//    public ActorDTO update(ActorDTO dto) {
-//        return updateActor(dto);
-//    }
+    public Actor update(Actor entity) {
+        return (Actor) updateEntity(entity);
+    }
 //
 //    @Override
 //    public void delete(Integer id) {

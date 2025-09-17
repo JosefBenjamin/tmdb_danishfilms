@@ -3,10 +3,7 @@ package app.services;
 import app.DAO.MovieDAO;
 import app.DTO.MovieDTO;
 import app.DTO.ResponseDTO;
-import app.entities.Movie;
-import app.entities.Actor;
-import app.entities.Director;
-import app.entities.Genre;
+import app.entities.*;
 import app.config.HibernateConfig;
 import app.exceptions.ApiException;
 import jakarta.persistence.EntityManager;
@@ -42,8 +39,8 @@ public class MovieService extends AbstractService<MovieDTO, Movie> {
         return saveMovie(dto);
     }
 
-    public MovieDTO update(MovieDTO dto) {
-        return updateMovie(dto);
+    public Movie update(Movie movie) {
+        return (Movie) updateEntity(movie);
     }
 
     public void delete(Integer id) {
@@ -171,38 +168,38 @@ public class MovieService extends AbstractService<MovieDTO, Movie> {
      * @param title The title to search for
      * @return List of matching MovieDTO objects
      */
-    public List<MovieDTO> searchMoviesByTitle(String title) {
-        if (title == null || title.trim().isEmpty()) {
-            throw apiExc.badRequest("movie title cannot be null" + title);
-        }
-
-        try {
-            return movieDAO.findByTitle(title).stream()
-                    .map(this::convertToDTO)
-                    .collect(Collectors.toList());
-        } catch (RuntimeException e) {
-            throw apiExc.notFound("search movies by title: " + e.getMessage());
-        }
-    }
+//    public List<MovieDTO> searchMoviesByTitle(String title) {
+//        if (title == null || title.trim().isEmpty()) {
+//            throw apiExc.badRequest("movie title cannot be null" + title);
+//        }
+//
+//        try {
+//            return movieDAO.findByTitle(title).stream()
+//                    .map(this::convertToDTO)
+//                    .collect(Collectors.toList());
+//        } catch (RuntimeException e) {
+//            throw apiExc.notFound("search movies by title: " + e.getMessage());
+//        }
+//    }
 
     /**
      * Gets all movies by a specific director
      * @param directorId The director ID
      * @return List of MovieDTO objects
      */
-    public List<MovieDTO> getMoviesByDirector(Integer directorId) {
-        if (directorId == null || directorId <= 0) {
-            throw apiExc.badRequest("director cannot be null" + directorId);
-        }
-
-        try {
-            return movieDAO.findByDirectorId(directorId).stream()
-                    .map(this::convertToDTO)
-                    .collect(Collectors.toList());
-        } catch (RuntimeException e) {
-            throw apiExc.notFound("could not get movies by director: " + e.getMessage());
-        }
-    }
+//    public List<MovieDTO> getMoviesByDirector(Integer directorId) {
+//        if (directorId == null || directorId <= 0) {
+//            throw apiExc.badRequest("director cannot be null" + directorId);
+//        }
+//
+//        try {
+//            return movieDAO.findByDirectorId(directorId).stream()
+//                    .map(this::convertToDTO)
+//                    .collect(Collectors.toList());
+//        } catch (RuntimeException e) {
+//            throw apiExc.notFound("could not get movies by director: " + e.getMessage());
+//        }
+//    }
 
     /**
      * Converts Movie entity to MovieDTO

@@ -6,19 +6,21 @@ import app.entities.Genre;
 import app.entities.Movie;
 import app.config.HibernateConfig;
 import app.exceptions.ApiException;
+import jakarta.persistence.EntityManagerFactory;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class GenreService implements Service<GenreDTO, Integer> {
+public class GenreService extends AbstractService<GenreDTO, Genre> {
 
     private final GenreDAO genreDAO;
 
     ApiException apiExc;
 
-    public GenreService() {
+    public GenreService(EntityManagerFactory emf) {
         // Use HibernateConfig to get EntityManagerFactory
+        super(emf);
         this.genreDAO = new GenreDAO(HibernateConfig.getEntityManagerFactory());
     }
 
@@ -26,11 +28,9 @@ public class GenreService implements Service<GenreDTO, Integer> {
      * Finds all genres in the database and converts to DTOs
      * @return List of GenreDTO objects
      */
-    public List<GenreDTO> getAllGenres() {
+    public List<Genre> getAllGenres() {
         try {
-            return genreDAO.findAll().stream()
-                    .map(this::convertToDTO)
-                    .collect(Collectors.toList());
+            return findAll(Genre.class);
         } catch (Exception e) {
             throw apiExc.serverError("Cannot retrieve all genres: " + e.getMessage());
         }
@@ -96,27 +96,27 @@ public class GenreService implements Service<GenreDTO, Integer> {
      * Updates an existing genre
      * @param genreDTO The genre data to update
      * @return Updated GenreDTO
-     */
-    public GenreDTO updateGenre(GenreDTO genreDTO) {
-        if (genreDTO.id() == null) {
-            throw apiExc.badRequest("Genre ID is required for update");
-        }
-        
-        validateGenreDTO(genreDTO);
-        
-        // Check if genre exists
-        if (!genreDAO.findById(genreDTO.id()).isPresent()) {
-            throw apiExc.notFound("Could not find genre with the ID: " + genreDTO.id());
-        }
-        
-        try {
-            Genre genre = convertToEntity(genreDTO);
-            Genre updatedGenre = genreDAO.update(genre);
-            return convertToDTO(updatedGenre);
-        } catch (RuntimeException e) {
-            throw apiExc.serverError("update genre: " + e.getMessage());
-        }
-    }
+//     */
+//    public GenreDTO updateGenre(GenreDTO genreDTO) {
+//        if (genreDTO.id() == null) {
+//            throw apiExc.badRequest("Genre ID is required for update");
+//        }
+//
+//        validateGenreDTO(genreDTO);
+//
+//        // Check if genre exists
+//        if (!genreDAO.findById(genreDTO.id()).isPresent()) {
+//            throw apiExc.notFound("Could not find genre with the ID: " + genreDTO.id());
+//        }
+//
+//        try {
+//            Genre genre = convertToEntity(genreDTO);
+//            Genre updatedGenre = genreDAO.update(genre);
+//            return convertToDTO(updatedGenre);
+//        } catch (RuntimeException e) {
+//            throw apiExc.serverError("update genre: " + e.getMessage());
+//        }
+//    }
 
     /**
      * Deletes a genre by ID
@@ -219,27 +219,22 @@ public class GenreService implements Service<GenreDTO, Integer> {
     }
 
     // Implementation of Service interface methods
-    @Override
     public List<GenreDTO> getAll() {
         return getAllGenres();
     }
 
-    @Override
     public GenreDTO getById(Integer id) {
         return getGenreById(id);
     }
 
-    @Override
     public GenreDTO save(GenreDTO dto) {
         return saveGenre(dto);
     }
 
-    @Override
-    public GenreDTO update(GenreDTO dto) {
-        return updateGenre(dto);
+    public Genre update(Genre entity) {
+        return (Genre) updateEntity(entity);
     }
 
-    @Override
     public void delete(Integer id) {
         deleteGenre(id);
     }
