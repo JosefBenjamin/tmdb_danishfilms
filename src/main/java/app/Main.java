@@ -8,7 +8,33 @@ import app.services.*;
 public class Main {
 
     public static void main(String[] args) {
-        ActorDAO actorDAO = new ActorDAO(HibernateConfig.getEntityManagerFactory());
+        // Get EntityManagerFactory
+        var emf = HibernateConfig.getEntityManagerFactory();
+
+        // Use ActorService instead of anonymous AbstractService
+        ActorService actorService = new ActorService(emf);
+
+        // Test full CRUD operations
+        System.out.println("\n=== Testing ActorService CRUD Operations ===");
+
+        // Save using service
+        ActorDTO newActorDTO = new ActorDTO(null, "Jane Smith", "Acting");
+        ActorDTO savedDTO = actorService.save(newActorDTO);
+        System.out.println("Saved Actor via Service: " + savedDTO.name() + " with ID: " + savedDTO.getId());
+
+        // Get by ID
+        var retrievedActor = actorService.getById(savedDTO.getId());
+        if (retrievedActor.isPresent()) {
+            System.out.println("Retrieved Actor: " + retrievedActor.get().name());
+        }
+
+        // Get all actors
+        var allActors = actorService.getAll();
+        System.out.println("Total actors in database: " + allActors.size());
+
+
+        // Test direct DAO usage
+        ActorDAO actorDAO = new ActorDAO(emf);
         Actor actor = new Actor();
         actor.setName("John Doe");
         actor.setAge(30);
@@ -16,14 +42,16 @@ public class Main {
         Actor savedActor = actorDAO.persist(actor);
         System.out.println("Saved Actor ID: " + savedActor.getId());
 
-        HibernateConfig.getEntityManagerFactory().close();
-
+        // Test service usage with proper ActorService
         ActorDTO test = new ActorDTO(1, "John Doe", "Director");
-            AbstractService abstractService = new AbstractService(HibernateConfig.getEntityManagerFactory()) {
-        };
-        Actor convertedActor = (Actor) abstractService.convertToEntity(test);
+
+
+        // Test conversion methods (these are now public through the service)
+        Actor convertedActor = actorService.convertToEntity(test);
         System.out.println("Converted Actor ID (DTO): " + test.name());
         System.out.println("Converted Actor Name (Entity): " + convertedActor.getName());
 
+        // Close EntityManagerFactory at the end
+        emf.close();
     }
 }

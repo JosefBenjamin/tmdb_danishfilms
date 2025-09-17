@@ -1,7 +1,6 @@
 package app.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Set;
 
 public record MovieDTO(
@@ -19,5 +18,10 @@ public record MovieDTO(
 
     @JsonProperty("genre_ids")
     Set<Integer> genreIds
+) implements BaseDTO<Integer> {
 
-){ }
+    @Override
+    public Integer getId() {
+        return id;
+    }
+}
