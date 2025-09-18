@@ -6,8 +6,11 @@ import app.Instance.entities.DirectorEntity;
 import app.exceptions.ApiException;
 import jakarta.persistence.EntityManagerFactory;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
- * DirectorService - Clean, minimal implementation using generic AbstractService
+ * DirectorService - Clean implementation using generic AbstractService
  */
 public class DirectorService extends AbstractService<DirectorDTO, DirectorEntity, Integer> {
 
@@ -16,7 +19,7 @@ public class DirectorService extends AbstractService<DirectorDTO, DirectorEntity
     }
 
     // ===========================================
-    // CONVERSION METHODS - Only thing we need to implement!
+    // CONVERSION METHODS - Required implementation from AbstractService
     // ===========================================
 
     @Override
@@ -24,54 +27,17 @@ public class DirectorService extends AbstractService<DirectorDTO, DirectorEntity
         return new DirectorDTO(
             directorEntity.getId(),
             directorEntity.getName(),
-            directorEntity.getJob() != null ? directorEntity.getJob() : "Directing"
+            directorEntity.getJob()
         );
     }
 
     @Override
-    protected DirectorEntity convertToEntity(DirectorDTO dto) {
+    protected DirectorEntity convertToEntity(DirectorDTO directorDTO) {
         return DirectorEntity.builder()
-            .id(dto.getId())
-            .name(dto.name())
-            .job(dto.job())
-            .age(0) // Default age
+            .id(directorDTO.getId())
+            .name(directorDTO.name())
+            .job(directorDTO.job())
             .build();
     }
-
-    @Override
-    protected void validateDTO(DirectorDTO dto) {
-        super.validateDTO(dto);
-
-        if (dto.name() == null || dto.name().trim().isEmpty()) {
-            throw ApiException.badRequest("Director name cannot be null or empty");
-        }
-    }
-
-    // ===========================================
-    // BUSINESS-SPECIFIC METHODS
-    // ===========================================
-
-    /**
-     * Custom delete with business rules
-     */
-//    @Override
-//    public void delete(Integer id) {
-//        if (id == null) {
-//            throw ApiException.badRequest("ID cannot be null");
-//        }
-//
-//        DirectorEntity directorEntity = dao.findById(id)
-//            .orElseThrow(() -> ApiException.notFound("Director not found with ID: " + id));
-//
-//        // Business rule: Cannot delete director with movies
-//        if (!directorEntity.getMovieEntities().isEmpty()) {
-//            throw ApiException.conflict("Cannot delete director with ID " + id + " because they have directed movies");
-//        }
-//
-//        try {
-//            dao.delete(directorEntity);
-//        } catch (Exception e) {
-//            throw ApiException.serverError("Failed to delete director with ID " + id + ": " + e.getMessage());
-//        }
-//    }
 }
+

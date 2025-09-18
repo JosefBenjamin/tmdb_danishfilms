@@ -91,6 +91,47 @@ public abstract class AbstractService<  DTO     extends IDTO<ID>,
         }
     }
 
+    /**
+     * Delete entity by ID
+     */
+    @Override
+    public void delete(ID id) {
+        if (id == null) {
+            throw ApiException.badRequest("ID cannot be null");
+        }
+        try {
+            Entity entity = dao.findEntityById(id)
+                .orElseThrow(() -> ApiException.notFound("Entity not found with ID: " + id));
+            dao.delete(entity);
+        } catch (Exception e) {
+            throw ApiException.serverError("Failed to delete entity with ID " + id + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Save (create or update) entity
+     */
+    public DTO save(DTO dto) {
+        validateDTO(dto);
+
+        try {
+            Entity entity = convertToEntity(dto);
+            Entity savedEntity;
+
+            if (dto.getId() == null) {
+                // Create new entity
+                savedEntity = dao.persist(entity);
+            } else {
+                // Update existing entity
+                savedEntity = dao.update(entity);
+            }
+
+            return convertToDTO(savedEntity);
+        } catch (Exception e) {
+            throw ApiException.serverError("Failed to save entity: " + e.getMessage());
+        }
+    }
+
     // ===========================================
     // HTTP CLIENT METHODS
     // ===========================================

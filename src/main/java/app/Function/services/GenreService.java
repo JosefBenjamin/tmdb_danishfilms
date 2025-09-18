@@ -88,50 +88,11 @@ public class GenreService extends AbstractService<GenreDTO, GenreEntity, Integer
      * Get all movies for a specific genre
      */
     public List<String> getMoviesByGenre(Integer genreId) {
-        GenreEntity genreEntity = dao.findById(genreId)
+        GenreEntity genreEntity = dao.findEntityById(genreId)
             .orElseThrow(() -> ApiException.notFound("Genre not found with ID: " + genreId));
 
         return genreEntity.getMovieEntities().stream()
             .map(movie -> movie.getTitle())
             .collect(Collectors.toList());
     }
-
-    /**
-     * Custom delete with business rules
-     */
-//    @Override
-//    public void delete(Integer id) {
-//        if (id == null) {
-//            throw ApiException.badRequest("ID cannot be null");
-//        }
-//
-//        GenreEntity genreEntity = dao.findById(id)
-//            .orElseThrow(() -> ApiException.notFound("Genre not found with ID: " + id));
-//
-//        // Business rule: Cannot delete genre with movies
-//        if (!genreEntity.getMovieEntities().isEmpty()) {
-//            throw ApiException.conflict("Cannot delete genre with ID " + id + " because it has associated movies");
-//        }
-//
-//        try {
-//            dao.delete(genreEntity);
-//        } catch (Exception e) {
-//            throw ApiException.serverError("Failed to delete genre with ID " + id + ": " + e.getMessage());
-//        }
-//    }
-
-    /**
-     * Custom save with business rules
-     */
-//    @Override
-//    public GenreDTO save(GenreDTO dto) {
-//        validateDTO(dto);
-//
-//        // Check if genre with same name already exists
-//        if (genreDAO.findByGenreName(dto.genreName()).isPresent()) {
-//            throw ApiException.conflict("Genre already exists with name: " + dto.genreName());
-//        }
-//
-//        return super.save(dto);
-//    }
 }

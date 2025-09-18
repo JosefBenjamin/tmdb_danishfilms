@@ -6,87 +6,16 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
 import java.util.List;
-import java.util.Optional;
 
-public class MovieDAO implements IDAO<MovieDTO, MovieEntity, Integer> {
-
-    private final EntityManagerFactory emf;
+public class MovieDAO extends AbstractDAO<MovieDTO, MovieEntity, Integer> {
 
     public MovieDAO(EntityManagerFactory emf) {
-        this.emf = emf;
-    }
-
-    @Override
-    public Optional<MovieEntity> findEntityById(Integer id) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            MovieEntity movie = em.find(MovieEntity.class, id);
-            return Optional.ofNullable(movie);
-        } finally {
-            em.close();
-        }
-    }
-
-    @Override
-    public List<MovieEntity> findAllEntity() {
-        EntityManager em = emf.createEntityManager();
-        try {
-            TypedQuery<MovieEntity> query = em.createQuery("SELECT m FROM MovieEntity m", MovieEntity.class);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
-
-    @Override
-    public MovieEntity persist(MovieEntity entity) {
-        try (EntityManager em = emf.createEntityManager()) {
-            em.getTransaction().begin();
-            try {
-                em.persist(entity);
-                em.getTransaction().commit();
-                return entity;
-            } catch (Exception e) {
-                em.getTransaction().rollback();
-                throw e;
-            }
-        }
-    }
-
-    @Override
-    public MovieEntity update(MovieEntity entity) {
-        try (EntityManager em = emf.createEntityManager()) {
-            em.getTransaction().begin();
-            try {
-                MovieEntity updated = em.merge(entity);
-                em.getTransaction().commit();
-                return updated;
-            } catch (Exception e) {
-                em.getTransaction().rollback();
-                throw e;
-            }
-        }
-    }
-
-    @Override
-    public void delete(MovieEntity entity) {
-        try (EntityManager em = emf.createEntityManager()) {
-            em.getTransaction().begin();
-            try {
-                MovieEntity managedMovieEntity = em.find(MovieEntity.class, entity.getId());
-                if (managedMovieEntity != null) {
-                    em.remove(managedMovieEntity);
-                }
-                em.getTransaction().commit();
-            } catch (Exception e) {
-                em.getTransaction().rollback();
-                throw e;
-            }
-        }
+        super(emf, MovieEntity.class);
     }
 
     @Override
     public void validateDTO(MovieDTO movieDTO) {
+        super.validateDTO(movieDTO);
         if (movieDTO.title() == null || movieDTO.title().trim().isEmpty()) {
             throw new IllegalArgumentException("Movie title cannot be null or empty");
         }

@@ -5,99 +5,73 @@ import app.Instance.entities.ActorEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
-import java.util.List;
 import java.util.Optional;
 
-public class ActorDAO implements IDAO<ActorDTO, ActorEntity, Integer> {
-
-    private final EntityManagerFactory emf;
+public class ActorDAO extends AbstractDAO<ActorDTO, ActorEntity, Integer> {
 
     public ActorDAO(EntityManagerFactory emf) {
-        this.emf = emf;
-    }
-
-    @Override
-    public Optional<ActorEntity> findEntityById(Integer integer) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            ActorEntity actor = em.find(ActorEntity.class, integer);
-            return Optional.ofNullable(actor);
-        } finally {
-            em.close();
-        }
-    }
-
-    @Override
-    public List<ActorEntity> findAllEntity() {
-        EntityManager em = emf.createEntityManager();
-        try {
-            TypedQuery<ActorEntity> query = em.createQuery("SELECT a FROM ActorEntity a", ActorEntity.class);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
-
-    @Override
-    public ActorEntity persist(ActorEntity actorEntity) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            em.getTransaction().begin();
-            em.persist(actorEntity);
-            em.getTransaction().commit();
-            return actorEntity;
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
-        }
-    }
-
-    @Override
-    public ActorEntity update(ActorEntity actorEntity) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            em.getTransaction().begin();
-            ActorEntity updatedActor = em.merge(actorEntity);
-            em.getTransaction().commit();
-            return updatedActor;
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
-        }
-    }
-
-    @Override
-    public void delete(ActorEntity actorEntity) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            em.getTransaction().begin();
-            ActorEntity toDelete = em.find(ActorEntity.class, actorEntity.getId());
-            if (toDelete != null) {
-                em.remove(toDelete);
-            }
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
-        }
+        super(emf, ActorEntity.class);
     }
 
     @Override
     public void validateDTO(ActorDTO actorDTO) {
+        super.validateDTO(actorDTO);
         if (actorDTO.name() == null || actorDTO.name().trim().isEmpty()) {
             throw new IllegalArgumentException("Actor name cannot be null or empty");
+        }
+    }
+
+    /**
+     * Find actor by ID with movies eagerly loaded using JOIN FETCH
+     */
+    public Optional<ActorEntity> findByIdWithMovies(Integer id) {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<ActorEntity> query = em.createQuery(
+                "SELECT DISTINCT a FROM ActorEntity a LEFT JOIN FETCH a.movieEntities WHERE a.id = :id", 
+                ActorEntity.class);
+            query.setParameter("id", id);
+            return query.getResultList().stream().findFirst();
+        }
+    }
+
+    /**
+     * Find actor by ID with directors eagerly loaded using JOIN FETCH
+     */
+    public Optional<ActorEntity> findByIdWithDirectors(Integer id) {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<ActorEntity> query = em.createQuery(
+                "SELECT DISTINCT a FROM ActorEntity a LEFT JOIN FETCH a.directorEntities WHERE a.id = :id", 
+                ActorEntity.class);
+            query.setParameter("id", id);
+            return query.getResultList().stream().findFirst();
+        }
+    }
+
+    /**
+     * Find actor by ID with both movies and directors eagerly loaded
+     */
+    public Optional<ActorEntity> findByIdWithAllRelations(Integer id) {
+        try (EntityManager em = emf.createEntityManager()) {
+            // First fetch with movies
+            TypedQuery<ActorEntity> movieQuery = em.createQuery(
+                "SELECT DISTINCT a FROM ActorEntity a LEFT JOIN FETCH a.movieEntities WHERE a.id = :id", 
+                ActorEntity.class);
+            movieQuery.setParameter("id", id);
+            
+            Optional<ActorEntity> actorWithMovies = movieQuery.getResultList().stream().findFirst();
+            
+            if (actorWithMovies.isPresent()) {
+                // Then fetch directors for the same actor
+                TypedQuery<ActorEntity> directorQuery = em.createQuery(
+                    "SELECT DISTINCT a FROM ActorEntity a LEFT JOIN FETCH a.directorEntities WHERE a.id = :id", 
+                    ActorEntity.class);
+                directorQuery.setParameter("id", id);
+                directorQuery.getResultList(); // This will populate the directors collection
+                
+                return actorWithMovies;
+            }
+            
+            return Optional.empty();
         }
     }
 }

@@ -19,9 +19,6 @@ public class DirectorEntity extends ResponseEntity<Integer> {
     @Column(name = "director_name", nullable = false)
     private String name;
 
-    @Column(name = "director_age")
-    private int age;
-
     @Column(name = "job")
     private String job;
 

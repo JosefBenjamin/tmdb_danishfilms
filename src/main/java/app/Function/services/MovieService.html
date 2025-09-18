@@ -24,7 +24,6 @@ public class MovieService extends AbstractService<MovieDTO, MovieEntity, Integer
     // ===========================================
     // CONVERSION METHODS - Required implementation from AbstractService
     // ===========================================
-
     @Override
     protected MovieDTO convertToDTO(MovieEntity movieEntity) {
         return new MovieDTO(
@@ -85,7 +84,7 @@ public class MovieService extends AbstractService<MovieDTO, MovieEntity, Integer
 
     /**
      * Find movies by director
-     */
+
     public List<MovieDTO> findByDirectorId(Integer directorId) {
         if (directorId == null) {
             throw ApiException.badRequest("Director ID cannot be null");
@@ -123,4 +122,3 @@ public class MovieService extends AbstractService<MovieDTO, MovieEntity, Integer
             .map(genre -> genre.getGenreName())
             .collect(Collectors.toList());
     }
-}
