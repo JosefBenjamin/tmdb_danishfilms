@@ -40,7 +40,6 @@ public class ActorService extends AbstractService<ActorDTO, Actor, Integer> {
         return Actor.builder()
             .id(dto.getId())
             .name(dto.name())
-            .age(0) // Default age or get from DTO if available
             .build();
     }
 
