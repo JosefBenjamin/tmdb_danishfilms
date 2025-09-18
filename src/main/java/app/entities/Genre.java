@@ -12,16 +12,22 @@ import java.util.Set;
 @Getter
 @Setter
 @AllArgsConstructor
-@Table(name = "genres")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(exclude = {"movies"})
+@Table(name = "genres", uniqueConstraints = @UniqueConstraint(columnNames = "tmdb_id"))
 public class Genre implements BaseEntity<Integer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Integer id;
+
+    @Column(name = "tmdb_id", nullable = false, unique = true)
+    private Integer tmdbId;
+
+    @Column(name = "genreName")
     private String genreName;
+
 
     // Inverse side of Many-to-Many relationship with Movie
     @ManyToMany(mappedBy = "genres", cascade = {CascadeType.PERSIST, CascadeType.MERGE})

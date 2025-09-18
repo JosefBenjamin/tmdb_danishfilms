@@ -1,6 +1,7 @@
 package app.services;
 
 import app.DAO.MovieDAO;
+import app.DAO.GenreDAO;
 import app.DTO.MovieDTO;
 import app.DTO.ResponseDTO;
 import app.entities.*;
@@ -17,10 +18,12 @@ import java.util.stream.Collectors;
 public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
 
     private final MovieDAO movieDAO;
+    private final GenreDAO genreDAO;
 
     public MovieService(EntityManagerFactory emf) {
         super(emf, new MovieDAO(emf));
         this.movieDAO = (MovieDAO) dao; // Cast for additional methods
+        this.genreDAO = new GenreDAO(emf);
     }
 
     // ===========================================
@@ -147,41 +150,140 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
         }
     }
 
-    public void fetchDanishMovies() {
+    public int fetchDanishMovies() {
+        int imported = 0;
         int page = 1;
-        int totalPages = 1;
-        LocalDate fiveYearsAgo = LocalDate.now().minusYears(1);
-        LocalDate now = LocalDate.now();
+        Integer totalPages = null;
 
-        while (page <= totalPages) {
+        // Use a 5-year window for Danish-language releases
+        LocalDate from = LocalDate.now().minusYears(5);
+        LocalDate to = LocalDate.now();
+
+        // Plain Java HTTP + Jackson (no Spring)
+        var http = java.net.http.HttpClient.newBuilder()
+                .connectTimeout(java.time.Duration.ofSeconds(15))
+                .version(java.net.http.HttpClient.Version.HTTP_2)
+                .build();
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        mapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+        String apiKey = System.getenv("API_KEY");
+        if (apiKey == null || apiKey.isBlank()) {
+            throw ApiException.serverError("API_KEY environment variable is not set");
+        }
+
+        // Fetch TMDB genre list once to map IDs -> names
+        Map<Integer, String> tmdbIdToNameMap = new HashMap<>();
+        try {
+            String genreUrl = "https://api.themoviedb.org/3/genre/movie/list?api_key=" + apiKey + "&language=en";
+            var genreReq = java.net.http.HttpRequest.newBuilder(java.net.URI.create(genreUrl))
+                    .header("accept", "application/json")
+                    .GET()
+                    .build();
+            var genreResp = http.send(genreReq, java.net.http.HttpResponse.BodyHandlers.ofString());
+            if (genreResp.statusCode() / 100 != 2) {
+                System.out.println("[TMDB] genre list status=" + genreResp.statusCode() + " body=" + genreResp.body());
+                throw new RuntimeException("TMDB genre list HTTP " + genreResp.statusCode());
+            }
+            var root = mapper.readTree(genreResp.body()).get("genres");
+            if (root != null && root.isArray()) {
+                for (com.fasterxml.jackson.databind.JsonNode g : root) {
+                    tmdbIdToNameMap.put(g.get("id").asInt(), g.get("name").asText());
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("[TMDB] Failed to fetch genre list: " + e.getMessage());
+        }
+
+        EntityManager em = emf.createEntityManager();
+        try {
+        while (totalPages == null || page <= totalPages) {
             try {
                 Map<String, String> params = new HashMap<>();
+                params.put("api_key", apiKey);
                 params.put("with_original_language", "da");
-                params.put("primary_release_date.gte", fiveYearsAgo.toString());
-                params.put("primary_release_date.lte", now.toString());
+                params.put("primary_release_date.gte", from.toString());
+                params.put("primary_release_date.lte", to.toString());
                 params.put("page", String.valueOf(page));
 
-                ResponseDTO response = makeApiRequestWithParams("/discover/movie", params, ResponseDTO.class);
+                String query = params.entrySet().stream()
+                        .map(e -> java.net.URLEncoder.encode(e.getKey(), java.nio.charset.StandardCharsets.UTF_8) + "=" +
+                                  java.net.URLEncoder.encode(e.getValue(), java.nio.charset.StandardCharsets.UTF_8))
+                        .collect(java.util.stream.Collectors.joining("&"));
 
-                if (response != null && response.results() != null) {
-                    for (MovieDTO movieDTO : response.results()) {
-                        try {
-                            Movie entity = convertToEntity(movieDTO);
+                String url = "https://api.themoviedb.org/3/discover/movie?" + query;
 
-                            if (movieDAO.findById(entity.getId()).isEmpty()) {
-                                movieDAO.persist(entity);
-                            }
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                    totalPages = response.totalPages();
+                System.out.println("[TMDB] GET " + url);
+                var req = java.net.http.HttpRequest.newBuilder(java.net.URI.create(url))
+                        .header("accept", "application/json")
+                        .GET()
+                        .build();
+                var resp = http.send(req, java.net.http.HttpResponse.BodyHandlers.ofString());
+                System.out.println("[TMDB] status=" + resp.statusCode());
+                if (resp.statusCode() / 100 != 2) {
+                    throw ApiException.serverError("TMDB error " + resp.statusCode() + ": " + resp.body());
                 }
-            } catch (RuntimeException e) {
-                throw new RuntimeException(e);
+
+                // Parse typed paginated response
+                ResponseDTO<MovieDTO> response = mapper.readValue(
+                        resp.body(),
+                        new com.fasterxml.jackson.core.type.TypeReference<ResponseDTO<MovieDTO>>() {}
+                );
+
+                if (response == null || response.results() == null || response.results().isEmpty()) {
+                    break; // nothing more to import
+                }
+
+                if (totalPages == null) {
+                    totalPages = response.totalPages();
+                    if (totalPages == null) totalPages = 1;  // defensive for rare non-paged responses
+                    totalPages = Math.min(totalPages, 500);  // TMDB caps pages to 500
+                }
+
+                for (MovieDTO movieDTO : response.results()) {
+                    // Build entity WITHOUT forcing our DB primary key (let @GeneratedValue assign)
+                    Movie entity = Movie.builder()
+                            .title(movieDTO.title())
+                            .releaseDate(movieDTO.releaseDate())
+                            .originalLanguage(movieDTO.originalLanguage())
+                            .build();
+
+                    // Attach genres by TMDB ID (upsert if missing in DB)
+                    if (movieDTO.genreIds() != null && !movieDTO.genreIds().isEmpty()) {
+                        Set<Genre> genres = new HashSet<>();
+                        for (Integer tmdbGenreId : movieDTO.genreIds()) {
+                            Genre genre = genreDAO.findByTmdbId(tmdbGenreId)
+                                    .orElseGet(() -> {
+                                        Genre g = new Genre();
+                                        g.setTmdbId(tmdbGenreId);
+                                        g.setGenreName(tmdbIdToNameMap.getOrDefault(tmdbGenreId, "Unknown"));
+                                        return genreDAO.persist(g);
+                                    });
+                            genres.add(genre);
+                        }
+                        entity.setGenres(genres);
+                    }
+
+                    // TODO: Prefer de-dup by a dedicated external key (tmdbId). Until then, be conservative:
+                    boolean exists = movieDAO.findByTitle(entity.getTitle()).stream()
+                            .anyMatch(m -> java.util.Objects.equals(m.getReleaseDate(), entity.getReleaseDate()));
+
+                    if (!exists) {
+                        movieDAO.persist(entity);
+                        imported++;
+                    }
+                }
+
+                page++;
+            } catch (Exception ex) {
+                Throwable cause = ex.getCause();
+                String causeMsg = (cause == null ? "" : " | cause=" + cause.getClass().getSimpleName() + ": " + String.valueOf(cause.getMessage()));
+                throw ApiException.serverError("Failed importing Danish movies page " + page + ": " + ex.getClass().getSimpleName() + " - " + String.valueOf(ex.getMessage()) + causeMsg);
             }
-            page++;
         }
+        } finally {
+            if (em != null && em.isOpen()) em.close();
+        }
+        return imported;
     }
 
 

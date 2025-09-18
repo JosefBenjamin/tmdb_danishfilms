@@ -55,11 +55,48 @@ public class Main {
         System.out.println("Converted Actor ID (DTO): " + test.name());
         System.out.println("Converted Actor Name (Entity): " + convertedActor.getName());
 
+        var http = java.net.http.HttpClient.newBuilder()
+                .connectTimeout(java.time.Duration.ofSeconds(10))
+                .proxy(java.net.ProxySelector.of(null))
+                .build();
+        System.setProperty("java.net.preferIPv4Stack", "true");
+        System.setProperty("java.net.preferIPv6Addresses", "false");
+
+        MovieService movieService = new MovieService(emf);
+
+
+
+        // Debug: verify API key is visible *before* making TMDB calls
+        String apiKey = System.getenv("API_KEY");
+        System.out.println("API key seen by JVM: len=" +
+                (apiKey == null ? 0 : apiKey.length()) +
+                ", head=" + (apiKey == null ? "null" : apiKey.substring(0, 3)) +
+                ", tail=" + (apiKey == null ? "" : apiKey.substring(Math.max(0, apiKey.length() - 3))));
+
+
+        System.out.println("API key seen by JVM: len=" + System.getenv("API_KEY").length()
+                + ", head=" + System.getenv("API_KEY").substring(0,3)
+                + ", tail=" + System.getenv("API_KEY").substring(System.getenv("API_KEY").length()-3));
+
+        try {
+            var addrs = java.net.InetAddress.getAllByName("api.themoviedb.org");
+            System.out.println("[DNS] api.themoviedb.org -> " + java.util.Arrays.toString(addrs));
+        } catch (Exception e) {
+            System.out.println("[DNS] failed: " + e);
+        }
+
+        System.out.println("[Proxy] http.proxyHost=" + System.getProperty("http.proxyHost")
+                + " https.proxyHost=" + System.getProperty("https.proxyHost"));
+
+
+        movieService.fetchDanishMovies();
+
+
+
         // Close EntityManagerFactory at the end
         emf.close();
 
 
-        MovieService movieService = new MovieService(emf);
-        movieService.fetchDanishMovies();
+
     }
 }
