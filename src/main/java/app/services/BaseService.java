@@ -7,7 +7,7 @@ import java.util.Optional;
  * Generic Service interface that all service classes implement
  * Provides standard CRUD operations for any DTO type
  */
-public interface IService<DTO, ID> {
+public interface BaseService<DTO, ID> {
 
     /**
      * Get all entities as DTOs

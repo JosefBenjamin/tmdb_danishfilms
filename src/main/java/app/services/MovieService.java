@@ -146,11 +146,14 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
             return new ArrayList<>();
         }
     }
-
+    /**
+     * Fetch Danish movies released in the last 5 years from external API
+     * and store/update them in the local database
+     */
     public void fetchDanishMovies() {
         int page = 1;
         int totalPages = 1;
-        LocalDate fiveYearsAgo = LocalDate.now().minusYears(1);
+        LocalDate fiveYearsAgo = LocalDate.now().minusYears(5);
         LocalDate now = LocalDate.now();
 
         while (page <= totalPages) {

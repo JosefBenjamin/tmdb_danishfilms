@@ -62,23 +62,25 @@ public class Movie implements BaseEntity<Integer> {
         this.id = id;
     }
 
-    // Helper methods for bidirectional relationship management with Genre
+    // Helper methods for bidirectional add with Genre
     public void addGenre(Genre genre) {
         this.genres.add(genre);
         genre.getMovies().add(this);
     }
 
+    // Helper methods for bidirectional remove with Genre
     public void removeGenre(Genre genre) {
         this.genres.remove(genre);
         genre.getMovies().remove(this);
     }
 
-    // Helper methods for bidirectional relationship management with Actor
+    // Helper methods for bidirectional add with Actor
     public void addActor(Actor actor) {
         this.actors.add(actor);
         actor.getMovies().add(this);
     }
 
+    // Helper methods for bidirectional remove with Actor
     public void removeActor(Actor actor) {
         this.actors.remove(actor);
         actor.getMovies().remove(this);
@@ -90,7 +92,6 @@ public class Movie implements BaseEntity<Integer> {
         if (this.director != null) {
             this.director.getMovies().remove(this);
         }
-
         this.director = director;
 
         // Add to new director if not null

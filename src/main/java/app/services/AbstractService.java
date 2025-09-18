@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractService   <DTO    extends BaseDTO<ID>,
                                          Entity extends BaseEntity<ID>, ID>
-        implements IService<DTO, ID> {
+        implements BaseService<DTO, ID> {
 
     // HTTP Client fields
     protected final ObjectMapper objectMapper;
@@ -32,9 +32,9 @@ public abstract class AbstractService   <DTO    extends BaseDTO<ID>,
 
     // Core dependencies
     protected final EntityManagerFactory emf;
-    protected final IDAO<Entity, ID> dao;
+    protected final BaseDAO<Entity, ID> dao;
 
-    public AbstractService(EntityManagerFactory emf, IDAO<Entity, ID> dao) {
+    public AbstractService(EntityManagerFactory emf, BaseDAO<Entity, ID> dao) {
         this.emf = emf;
         this.dao = dao;
 

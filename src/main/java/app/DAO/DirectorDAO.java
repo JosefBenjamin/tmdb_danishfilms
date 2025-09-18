@@ -7,7 +7,7 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-public class DirectorDAO implements IDAO<Director, Integer> {
+public class DirectorDAO implements BaseDAO<Director, Integer> {
 
     private final EntityManagerFactory emf;
 
