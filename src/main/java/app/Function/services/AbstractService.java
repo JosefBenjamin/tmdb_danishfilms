@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * @param <Entity> The Entity type extending BaseEntity
  * @param <ID> The ID type (Integer, Long, etc.)
  */
-public abstract class AbstractService<DTO extends IDTO<ID>, Entity extends IEntity<ID>, ID> implements IService<DTO, ID> {
+public abstract class AbstractService<DTO extends IDTO<ID>, Entity extends IEntity<ID>, ID> implements IService<DTO, Entity, ID> {
 
     // HTTP Client fields
     private static final String API_URL = "https://api.themoviedb.org/3";
@@ -66,13 +66,24 @@ public abstract class AbstractService<DTO extends IDTO<ID>, Entity extends IEnti
      * Get entity by ID as DTO
      */
     @Override
-    public Optional<DTO> getById(ID id) {
+    public Optional<DTO> getDTOById(ID id) {
         if (id == null) {
             throw ApiException.badRequest("ID cannot be null");
         }
-
         try {
             return dao.findById(id).map(this::convertToDTO);
+        } catch (Exception e) {
+            throw ApiException.serverError("Failed to retrieve entity with ID " + id + ": " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Optional<Entity> getEntityById(ID id){
+        if (id == null) {
+            throw ApiException.badRequest("ID cannot be null");
+        }
+        try {
+            return dao.findById(id);
         } catch (Exception e) {
             throw ApiException.serverError("Failed to retrieve entity with ID " + id + ": " + e.getMessage());
         }

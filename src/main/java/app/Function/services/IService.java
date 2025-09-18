@@ -7,7 +7,7 @@ import java.util.Optional;
  * Generic Service interface that all service classes implement
  * Provides standard CRUD operations for any DTO type
  */
-public interface IService<DTO, ID> {
+public interface IService<DTO, Entity ,ID> {
 
     /**
      * Get all entities as DTOs
@@ -17,7 +17,9 @@ public interface IService<DTO, ID> {
     /**
      * Get entity by ID as DTO
      */
-     Optional<DTO> getById(ID id);
+     Optional<DTO> getDTOById(ID id);
+
+     Optional<Entity> getEntityById(ID id);
 
     /**
      * Save entity from DTO
@@ -33,4 +35,5 @@ public interface IService<DTO, ID> {
      * Delete entity by ID
      */
     void delete(ID id);
+
 }

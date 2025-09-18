@@ -25,7 +25,7 @@ public class Main {
         System.out.println("Saved Actor via Service: " + savedDTO.name() + " with ID: " + savedDTO.getId());
 
         // Get by ID
-        var retrievedActor = actorService.getById(savedDTO.getId());
+        var retrievedActor = actorService.getDTOById(savedDTO.getId());
         if (retrievedActor.isPresent()) {
             System.out.println("Retrieved Actor: " + retrievedActor.get().name());
         }
