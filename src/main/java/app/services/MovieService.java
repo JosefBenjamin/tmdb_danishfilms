@@ -34,11 +34,11 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
                 .collect(Collectors.toSet());
 
         return new MovieDTO(
-            movie.getId(),
-            movie.getTitle(),
-            movie.getReleaseYear(),
-            movie.getOriginalLanguage(),
-            genreIds
+                movie.getId(),
+                movie.getTitle(),
+                movie.getReleaseDate(),
+                movie.getOriginalLanguage(),
+                genreIds
         );
     }
 
@@ -46,11 +46,11 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
     protected Movie convertToEntity(MovieDTO dto) {
         try (EntityManager em = emf.createEntityManager()) {
             Movie movie = Movie.builder()
-                .id(dto.getId())
-                .title(dto.title())
-                .releaseYear(dto.releaseYear())
-                .originalLanguage(dto.originalLanguage())
-                .build();
+                    .id(dto.getId())
+                    .title(dto.title())
+                    .releaseDate(dto.releaseDate())
+                    .originalLanguage(dto.originalLanguage())
+                    .build();
 
             // Fetch and set genres if provided
             if (dto.genreIds() != null && !dto.genreIds().isEmpty()) {
@@ -79,10 +79,10 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
             throw ApiException.badRequest("Movie title cannot be null or empty");
         }
 
-        if (dto.releaseYear() != null) {
-            int year = dto.releaseYear();
-            if (year < 1888 || year > LocalDate.now().getYear() + 10) {
-                throw ApiException.badRequest("Invalid release year: " + year);
+        if (dto.releaseDate() != null) {
+            LocalDate releaseDate = dto.releaseDate();
+            if ( releaseDate.isBefore(LocalDate.now().minusYears(5))) {
+                throw ApiException.badRequest("Invalid release release date: " + releaseDate);
             }
         }
     }
@@ -101,8 +101,8 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
 
         try {
             return movieDAO.findByTitle(title).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             throw ApiException.serverError("Failed to search movies by title: " + e.getMessage());
         }
@@ -118,8 +118,8 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
 
         try {
             return movieDAO.findByDirectorId(directorId).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             throw ApiException.serverError("Failed to get movies by director: " + e.getMessage());
         }
@@ -146,4 +146,43 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
             return new ArrayList<>();
         }
     }
+
+    public void fetchDanishMovies() {
+        int page = 1;
+        int totalPages = 1;
+        LocalDate fiveYearsAgo = LocalDate.now().minusYears(1);
+        LocalDate now = LocalDate.now();
+
+        while (page <= totalPages) {
+            try {
+                Map<String, String> params = new HashMap<>();
+                params.put("with_original_language", "da");
+                params.put("primary_release_date.gte", fiveYearsAgo.toString());
+                params.put("primary_release_date.lte", now.toString());
+                params.put("page", String.valueOf(page));
+
+                ResponseDTO response = makeApiRequestWithParams("/discover/movie", params, ResponseDTO.class);
+
+                if (response != null && response.results() != null) {
+                    for (MovieDTO movieDTO : response.results()) {
+                        try {
+                            Movie entity = convertToEntity(movieDTO);
+
+                            if (movieDAO.findById(entity.getId()).isEmpty()) {
+                                movieDAO.persist(entity);
+                            }
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    totalPages = response.totalPages();
+                }
+            } catch (RuntimeException e) {
+                throw new RuntimeException(e);
+            }
+            page++;
+        }
+    }
+
+
 }

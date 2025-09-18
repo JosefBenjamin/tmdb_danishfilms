@@ -1,12 +1,11 @@
 package app.DTO;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.time.LocalDate;
 import java.util.Set;
-
-/*
-API reference: https://developer.themoviedb.org/reference/discover-movie
- */
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record MovieDTO(
     @JsonProperty("id")
     Integer id,
@@ -15,7 +14,7 @@ public record MovieDTO(
     String title,
 
     @JsonProperty("release_date")
-    Integer releaseYear,
+    LocalDate releaseDate,
 
     @JsonProperty("original_language")
     String originalLanguage,
