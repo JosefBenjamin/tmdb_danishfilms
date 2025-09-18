@@ -1,5 +1,6 @@
 package app.Function.DAO;
 
+import app.Instance.DTO.GenreDTO;
 import app.Instance.entities.GenreEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -7,7 +8,7 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-public class GenreDAO implements IDAO<GenreEntity, Integer> {
+public class GenreDAO implements IDAO<GenreDTO, GenreEntity, Integer> {
 
     private final EntityManagerFactory emf;
 

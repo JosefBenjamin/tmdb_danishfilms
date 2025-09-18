@@ -1,5 +1,6 @@
 package app.Function.DAO;
 
+import app.Instance.DTO.ActorDTO;
 import app.Instance.entities.ActorEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -7,7 +8,7 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-public class ActorDAO implements IDAO<ActorEntity, Integer> {
+public class ActorDAO implements IDAO<ActorDTO, ActorEntity, Integer> {
 
     private final EntityManagerFactory emf;
 

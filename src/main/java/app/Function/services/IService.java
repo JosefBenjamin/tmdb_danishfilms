@@ -9,31 +9,16 @@ import java.util.Optional;
  */
 public interface IService<DTO, Entity ,ID> {
 
-    /**
-     * Get all entities as DTOs
-     */
+    //  Get all entities as DTOs
     List<DTO> getAll();
 
-    /**
-     * Get entity by ID as DTO
-     */
+ //     Get entity by ID as DTO
      Optional<DTO> getDTOById(ID id);
 
+   //   Get entity by ID
      Optional<Entity> getEntityById(ID id);
 
-    /**
-     * Save entity from DTO
-     */
-    DTO save(DTO dto);
-
-    /**
-     * Update entity from DTO
-     */
-    DTO update(DTO dto);
-
-    /**
-     * Delete entity by ID
-     */
+   //   Delete entity by ID
     void delete(ID id);
 
 }

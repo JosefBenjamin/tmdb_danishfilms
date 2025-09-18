@@ -20,7 +20,9 @@ import java.util.stream.Collectors;
  * @param <Entity> The Entity type extending BaseEntity
  * @param <ID> The ID type (Integer, Long, etc.)
  */
-public abstract class AbstractService<DTO extends IDTO<ID>, Entity extends IEntity<ID>, ID> implements IService<DTO, Entity, ID> {
+public abstract class AbstractService<  DTO     extends IDTO<ID>,
+                                        Entity  extends IEntity<ID>, ID>
+                implements IService<DTO, Entity, ID> {
 
     // HTTP Client fields
     private static final String API_URL = "https://api.themoviedb.org/3";
@@ -30,10 +32,10 @@ public abstract class AbstractService<DTO extends IDTO<ID>, Entity extends IEnti
 
     // Core dependencies
     protected final EntityManagerFactory emf;
-    protected final IDAO<Entity, ID> dao;
+    protected final IDAO<DTO, Entity, ID> dao;
 
     public AbstractService(EntityManagerFactory emf,
-                           IDAO<Entity, ID> dao) {
+                           IDAO<DTO, Entity, ID> dao) {
         this.emf = emf;
         this.dao = dao;
 
@@ -54,7 +56,7 @@ public abstract class AbstractService<DTO extends IDTO<ID>, Entity extends IEnti
     @Override
     public List<DTO> getAll() {
         try {
-            return dao.findAll().stream()
+            return dao.findAllEntity().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
         } catch (Exception e) {
@@ -71,7 +73,7 @@ public abstract class AbstractService<DTO extends IDTO<ID>, Entity extends IEnti
             throw ApiException.badRequest("ID cannot be null");
         }
         try {
-            return dao.findById(id).map(this::convertToDTO);
+            return dao.findEntityById(id).map(this::convertToDTO);
         } catch (Exception e) {
             throw ApiException.serverError("Failed to retrieve entity with ID " + id + ": " + e.getMessage());
         }
@@ -83,69 +85,9 @@ public abstract class AbstractService<DTO extends IDTO<ID>, Entity extends IEnti
             throw ApiException.badRequest("ID cannot be null");
         }
         try {
-            return dao.findById(id);
+            return dao.findEntityById(id);
         } catch (Exception e) {
             throw ApiException.serverError("Failed to retrieve entity with ID " + id + ": " + e.getMessage());
-        }
-    }
-
-    /**
-     * Save entity from DTO
-     */
-    @Override
-    public DTO save(DTO dto) {
-        validateDTO(dto);
-
-        try {
-            Entity entity = convertToEntity(dto);
-            Entity savedEntity = dao.persist(entity);
-            return convertToDTO(savedEntity);
-        } catch (Exception e) {
-            throw ApiException.serverError("Failed to save entity: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Update entity from DTO
-     */
-    @Override
-    public DTO update(DTO dto) {
-        if (dto.getId() == null) {
-            throw ApiException.badRequest("ID is required for update");
-        }
-
-        validateDTO(dto);
-
-        // Check if entity exists
-        if (dao.findById(dto.getId()).isEmpty()) {
-            throw ApiException.notFound("Entity not found with ID: " + dto.getId());
-        }
-
-        try {
-            Entity entity = convertToEntity(dto);
-            Entity updatedEntity = dao.update(entity);
-            return convertToDTO(updatedEntity);
-        } catch (Exception e) {
-            throw ApiException.serverError("Failed to update entity: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Delete entity by ID
-     */
-    @Override
-    public void delete(ID id) {
-        if (id == null) {
-            throw ApiException.badRequest("ID cannot be null");
-        }
-
-        Entity entity = dao.findById(id)
-            .orElseThrow(() -> ApiException.notFound("Entity not found with ID: " + id));
-
-        try {
-            dao.delete(entity);
-        } catch (Exception e) {
-            throw ApiException.serverError("Failed to delete entity with ID " + id + ": " + e.getMessage());
         }
     }
 
