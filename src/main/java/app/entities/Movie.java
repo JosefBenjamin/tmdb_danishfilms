@@ -31,7 +31,7 @@ public class Movie implements BaseEntity<Integer> {
     private String originalLanguage;
 
     // Many-to-Many relationship with Genre (Movie can have multiple genres)
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "movies_and_genres",
         joinColumns = @JoinColumn(name = "movie_id"),
         inverseJoinColumns = @JoinColumn(name = "genre_id"))
@@ -39,7 +39,7 @@ public class Movie implements BaseEntity<Integer> {
     private Set<Genre> genres = new HashSet<>();
 
     // Many-to-Many relationship with Actor (Movie can have multiple actors)
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "movies_and_actors",
             joinColumns = @JoinColumn(name = "movie_id"),
             inverseJoinColumns = @JoinColumn(name = "actor_id"))
@@ -47,7 +47,7 @@ public class Movie implements BaseEntity<Integer> {
     private Set<Actor> actors = new HashSet<>();
 
     // Many-to-One relationship with Director (Movie has one director)
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "director_id")
     private Director director;
 

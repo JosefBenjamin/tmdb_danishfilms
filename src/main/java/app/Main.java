@@ -55,11 +55,12 @@ public class Main {
         System.out.println("Converted Actor ID (DTO): " + test.name());
         System.out.println("Converted Actor Name (Entity): " + convertedActor.getName());
 
-        // Close EntityManagerFactory at the end
-        emf.close();
 
-
+        
         MovieService movieService = new MovieService(emf);
         movieService.fetchDanishMovies();
+
+        // Close EntityManagerFactory at the end
+        emf.close();
     }
 }

@@ -46,7 +46,6 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
     protected Movie convertToEntity(MovieDTO dto) {
         try (EntityManager em = emf.createEntityManager()) {
             Movie movie = Movie.builder()
-                    .id(dto.getId())
                     .title(dto.title())
                     .releaseDate(dto.releaseDate())
                     .originalLanguage(dto.originalLanguage())
@@ -58,9 +57,10 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
                 for (Integer genreId : dto.genreIds()) {
                     Genre genre = em.find(Genre.class, genreId);
                     if (genre == null) {
-                        throw ApiException.notFound("Genre with id " + genreId + " not found");
+                        genres.add(genre);
+                    } else {
+                        throw ApiException.badRequest("Genre with ID " + genreId + " not found");
                     }
-                    genres.add(genre);
                 }
                 movie.setGenres(genres);
             }
@@ -164,20 +164,36 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
                 ResponseDTO response = makeApiRequestWithParams("/discover/movie", params, ResponseDTO.class);
 
                 if (response != null && response.results() != null) {
-                    for (MovieDTO movieDTO : response.results()) {
+                    for (Object movieObj : response.results()) {
                         try {
-                            Movie entity = convertToEntity(movieDTO);
+                            MovieDTO movieDTO = objectMapper.convertValue(movieObj, MovieDTO.class);
+                            //Movie entity = convertToEntity(movieDTO);
+                            Optional<Movie> existingMovie = movieDAO.findById(movieDTO.getId());
 
-                            if (movieDAO.findById(entity.getId()).isEmpty()) {
+                            if (existingMovie.isEmpty()) {
+                                // Movie doesn't exist - create new one
+                                Movie entity = convertToEntity(movieDTO);
                                 movieDAO.persist(entity);
+                                System.out.println("Created new movie: " + movieDTO.title());
+                            } else {
+                                // Movie exists - update it
+                                Movie existing = existingMovie.get();
+                                existing.setTitle(movieDTO.title());
+                                existing.setReleaseDate(movieDTO.releaseDate());
+                                existing.setOriginalLanguage(movieDTO.originalLanguage());
+
+                                movieDAO.update(existing);
+                                System.out.println("Updated existing movie: " + movieDTO.title());
                             }
                         } catch (Exception e) {
+                            System.err.println("Failed to process movie: " + e.getMessage());
                             throw new RuntimeException(e);
                         }
                     }
                     totalPages = response.totalPages();
                 }
             } catch (RuntimeException e) {
+                System.err.println("Failed to process movie: " + e.getMessage());
                 throw new RuntimeException(e);
             }
             page++;
