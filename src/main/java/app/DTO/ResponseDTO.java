@@ -9,12 +9,13 @@ import java.util.List;
 public record ResponseDTO <DTO>(
     @JsonProperty("page")
     Integer page,
+
     @JsonProperty("results")
     List<DTO> results,
+
     @JsonProperty("total_pages")
     Integer totalPages,
+
     @JsonProperty("total_results")
     Integer totalResults
-) {
-
-}
+) { }
