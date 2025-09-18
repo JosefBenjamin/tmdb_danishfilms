@@ -2,10 +2,9 @@ package app.services;
 
 import app.DAO.ActorDAO;
 import app.DTO.ActorDTO;
-import app.DTO.PersonDTO;
+import app.DTO.MovieDTO;
 import app.DTO.ResponseDTO;
 import app.entities.Actor;
-import app.config.HibernateConfig;
 import app.exceptions.ApiException;
 import jakarta.persistence.EntityManagerFactory;
 
@@ -60,15 +59,17 @@ public class ActorService extends AbstractService<ActorDTO, Actor, Integer> {
     /**
      * Search for actors by name using TMDB API
      */
-    public List<PersonDTO> searchActorsByName(String actorName) {
+
+    /*
+    public List<Actor> searchActorsByName(String actorName) {
         try {
-            ResponseDTO response = searchContent(actorName, "person", ResponseDTO.class);
+            ResponseDTO response = searchContent(actorName, "actor", ResponseDTO.class);
 
             if (response != null && response.results() != null) {
                 // Convert MovieDTO results to PersonDTO (assuming TMDB returns person data)
                 return response.results().stream()
-                    .map(movieDto -> new PersonDTO(
-                        movieDto.getId(),
+                    .map(movieDto -> new MovieDTO(
+                        movieDto.(),
                         movieDto.title(), // Using title as name
                         null, null, null, null, "Acting"
                     ))
@@ -83,13 +84,14 @@ public class ActorService extends AbstractService<ActorDTO, Actor, Integer> {
     /**
      * Get popular actors from TMDB API
      */
-    public List<PersonDTO> getPopularActors() {
+    /*
+    public List<Actor> getPopularActors() {
         try {
             ResponseDTO response = makeApiRequest("/person/popular", ResponseDTO.class);
 
             if (response != null && response.results() != null) {
                 return response.results().stream()
-                    .map(movieDto -> new PersonDTO(
+                    .map(movieDto -> new Actor(
                         movieDto.getId(),
                         movieDto.title(),
                         null, null, null, null, "Acting"
@@ -101,4 +103,9 @@ public class ActorService extends AbstractService<ActorDTO, Actor, Integer> {
         }
         return new ArrayList<>();
     }
+
+
+     */
+
+
 }

@@ -22,7 +22,6 @@ public record MovieDTO(
     @JsonProperty("genre_ids")
     Set<Integer> genreIds
 ) implements BaseDTO<Integer> {
-
     @Override
     public Integer getId() {
         return id;

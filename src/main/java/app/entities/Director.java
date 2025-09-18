@@ -4,15 +4,14 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.List;
-import java.util.ArrayList;
+
 
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true) //only uses id for equality
 @ToString(exclude = {"actors", "movies"}) // avoids recursion
 public class Director implements BaseEntity<Integer> {
@@ -24,15 +23,15 @@ public class Director implements BaseEntity<Integer> {
 
     @Setter
     private String name;
-    private int age;
+    private Integer age;
 
     private String job;
-    @ManyToMany(mappedBy = "directors")
+    @ManyToMany(mappedBy = "directors", fetch = FetchType.LAZY)
     @Builder.Default
     private Set<Actor> actors = new HashSet<>();
 
 
-    @OneToMany(mappedBy = "director")
+    @OneToMany(mappedBy = "director", fetch = FetchType.LAZY)
     @Builder.Default
     private Set<Movie> movies = new HashSet<>();
 

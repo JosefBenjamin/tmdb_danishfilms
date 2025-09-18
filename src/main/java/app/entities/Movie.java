@@ -3,10 +3,7 @@ package app.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -14,14 +11,18 @@ import java.util.Set;
 
 @Entity
 @Builder
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "movies")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"genres", "actors", "director"})
 public class Movie implements BaseEntity<Integer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Integer id;
 
     private String title;
@@ -30,7 +31,7 @@ public class Movie implements BaseEntity<Integer> {
     private String originalLanguage;
 
     // Many-to-Many relationship with Genre (Movie can have multiple genres)
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "movies_and_genres",
         joinColumns = @JoinColumn(name = "movie_id"),
         inverseJoinColumns = @JoinColumn(name = "genre_id"))
@@ -38,7 +39,7 @@ public class Movie implements BaseEntity<Integer> {
     private Set<Genre> genres = new HashSet<>();
 
     // Many-to-Many relationship with Actor (Movie can have multiple actors)
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "movies_and_actors",
             joinColumns = @JoinColumn(name = "movie_id"),
             inverseJoinColumns = @JoinColumn(name = "actor_id"))
@@ -46,7 +47,7 @@ public class Movie implements BaseEntity<Integer> {
     private Set<Actor> actors = new HashSet<>();
 
     // Many-to-One relationship with Director (Movie has one director)
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "director_id")
     private Director director;
 

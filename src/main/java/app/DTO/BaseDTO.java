@@ -1,5 +1,5 @@
 package app.DTO;
 
-public interface BaseDTO <ID>{
+public interface BaseDTO<ID> {
     ID getId();
 }
