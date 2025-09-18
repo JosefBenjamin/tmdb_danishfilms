@@ -16,19 +16,26 @@ public class DirectorDAO implements IDAO<DirectorDTO, DirectorEntity, Integer> {
         this.emf = emf;
     }
 
+
     @Override
-    public Optional<DirectorEntity> findById(Integer id) {
-        try (EntityManager em = emf.createEntityManager()) {
-            DirectorEntity directorEntity = em.find(DirectorEntity.class, id);
-            return Optional.ofNullable(directorEntity);
+    public Optional<DirectorEntity> findEntityById(Integer integer) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            DirectorEntity director = em.find(DirectorEntity.class, integer);
+            return Optional.ofNullable(director);
+        } finally {
+            em.close();
         }
     }
 
     @Override
-    public List<DirectorEntity> findAll() {
-        try (EntityManager em = emf.createEntityManager()) {
+    public List<DirectorEntity> findAllEntity() {
+        EntityManager em = emf.createEntityManager();
+        try {
             TypedQuery<DirectorEntity> query = em.createQuery("SELECT d FROM DirectorEntity d", DirectorEntity.class);
             return query.getResultList();
+        } finally {
+            em.close();
         }
     }
 
@@ -77,5 +84,10 @@ public class DirectorDAO implements IDAO<DirectorDTO, DirectorEntity, Integer> {
                 throw e;
             }
         }
+    }
+
+    @Override
+    public void validateDTO(DirectorDTO directorDTO) {
+
     }
 }

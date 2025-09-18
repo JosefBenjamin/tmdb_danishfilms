@@ -17,65 +17,87 @@ public class ActorDAO implements IDAO<ActorDTO, ActorEntity, Integer> {
     }
 
     @Override
-    public Optional<ActorEntity> findById(Integer id) {
-        try (EntityManager em = emf.createEntityManager()) {
-            ActorEntity actorEntity = em.find(ActorEntity.class, id);
-            return Optional.ofNullable(actorEntity);
+    public Optional<ActorEntity> findEntityById(Integer integer) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            ActorEntity actor = em.find(ActorEntity.class, integer);
+            return Optional.ofNullable(actor);
+        } finally {
+            em.close();
         }
     }
 
     @Override
-    public List<ActorEntity> findAll() {
-        try (EntityManager em = emf.createEntityManager()) {
+    public List<ActorEntity> findAllEntity() {
+        EntityManager em = emf.createEntityManager();
+        try {
             TypedQuery<ActorEntity> query = em.createQuery("SELECT a FROM ActorEntity a", ActorEntity.class);
             return query.getResultList();
-        }
-    }
-
-
-    public ActorEntity persist(ActorEntity entity) {
-        try (EntityManager em = emf.createEntityManager()) {
-            em.getTransaction().begin();
-            try {
-                em.persist(entity);
-                em.getTransaction().commit();
-                return entity;
-            } catch (Exception e) {
-                em.getTransaction().rollback();
-                throw e;
-            }
+        } finally {
+            em.close();
         }
     }
 
     @Override
-    public ActorEntity update(ActorEntity entity) {
-        try (EntityManager em = emf.createEntityManager()) {
+    public ActorEntity persist(ActorEntity actorEntity) {
+        EntityManager em = emf.createEntityManager();
+        try {
             em.getTransaction().begin();
-            try {
-                ActorEntity updated = em.merge(entity);
-                em.getTransaction().commit();
-                return updated;
-            } catch (Exception e) {
+            em.persist(actorEntity);
+            em.getTransaction().commit();
+            return actorEntity;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
-                throw e;
             }
+            throw e;
+        } finally {
+            em.close();
         }
     }
 
     @Override
-    public void delete(ActorEntity entity) {
-        try (EntityManager em = emf.createEntityManager()) {
+    public ActorEntity update(ActorEntity actorEntity) {
+        EntityManager em = emf.createEntityManager();
+        try {
             em.getTransaction().begin();
-            try {
-                ActorEntity managedActorEntity = em.find(ActorEntity.class, entity.getId());
-                if (managedActorEntity != null) {
-                    em.remove(managedActorEntity);
-                }
-                em.getTransaction().commit();
-            } catch (Exception e) {
+            ActorEntity updatedActor = em.merge(actorEntity);
+            em.getTransaction().commit();
+            return updatedActor;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
-                throw e;
             }
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public void delete(ActorEntity actorEntity) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            ActorEntity toDelete = em.find(ActorEntity.class, actorEntity.getId());
+            if (toDelete != null) {
+                em.remove(toDelete);
+            }
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public void validateDTO(ActorDTO actorDTO) {
+        if (actorDTO.name() == null || actorDTO.name().trim().isEmpty()) {
+            throw new IllegalArgumentException("Actor name cannot be null or empty");
         }
     }
 }

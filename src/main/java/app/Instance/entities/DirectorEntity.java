@@ -2,24 +2,19 @@ package app.Instance.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "directors")
-@EqualsAndHashCode(onlyExplicitlyIncluded = true) //only uses id for equality
+@EqualsAndHashCode(callSuper = true)
 @ToString(exclude = {"actorEntities", "movieEntities"}) // avoids recursion
-public class DirectorEntity implements IEntity<Integer> {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "director_id")
-    @EqualsAndHashCode.Include  // only id is used
-    private Integer id;
+public class DirectorEntity extends ResponseEntity<Integer> {
 
     @Column(name = "director_name", nullable = false)
     private String name;

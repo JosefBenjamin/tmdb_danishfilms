@@ -1,5 +1,5 @@
 package app.Instance.entities;
-
+import lombok.Data.*;
 /**
  * Base interface for all Entity classes
  * Provides common contract for all entity implementations

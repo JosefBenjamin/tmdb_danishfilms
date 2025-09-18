@@ -16,19 +16,26 @@ public class GenreDAO implements IDAO<GenreDTO, GenreEntity, Integer> {
         this.emf = emf;
     }
 
+
     @Override
-    public Optional<GenreEntity> findById(Integer id) {
-        try (EntityManager em = emf.createEntityManager()) {
-            GenreEntity genreEntity = em.find(GenreEntity.class, id);
-            return Optional.ofNullable(genreEntity);
+    public Optional<GenreEntity> findEntityById(Integer integer) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            GenreEntity genre = em.find(GenreEntity.class, integer);
+            return Optional.ofNullable(genre);
+        } finally {
+            em.close();
         }
     }
 
     @Override
-    public List<GenreEntity> findAll() {
-        try (EntityManager em = emf.createEntityManager()) {
+    public List<GenreEntity> findAllEntity() {
+        EntityManager em = emf.createEntityManager();
+        try {
             TypedQuery<GenreEntity> query = em.createQuery("SELECT g FROM GenreEntity g", GenreEntity.class);
             return query.getResultList();
+        } finally {
+            em.close();
         }
     }
 
@@ -77,6 +84,11 @@ public class GenreDAO implements IDAO<GenreDTO, GenreEntity, Integer> {
                 throw e;
             }
         }
+    }
+
+    @Override
+    public void validateDTO(GenreDTO genreDTO) {
+
     }
 
     // Additional query methods

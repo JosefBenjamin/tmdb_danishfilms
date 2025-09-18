@@ -7,24 +7,20 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @Data
 @AllArgsConstructor
 @Table(name = "genres")
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(callSuper = true)
 @ToString(exclude = {"movieEntities"})
-public class GenreEntity implements IEntity<Integer> {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
-    private Integer id;
+public class GenreEntity extends ResponseEntity<Integer> {
 
     private String genreName;
 
@@ -32,8 +28,6 @@ public class GenreEntity implements IEntity<Integer> {
     @ManyToMany(mappedBy = "genreEntities", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @Builder.Default
     private Set<MovieEntity> movieEntities = new HashSet<>();
-
-
 
     // Helper methods for bidirectional relationship management with Movie
     public void addMovie(MovieEntity movieEntity) {

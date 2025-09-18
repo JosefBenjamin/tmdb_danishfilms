@@ -2,7 +2,6 @@ package app.Function.services;
 
 import app.Function.DAO.ActorDAO;
 import app.Instance.DTO.ActorDTO;
-import app.Instance.DTO.PersonDTO;
 import app.Instance.DTO.ResponseDTO;
 import app.Instance.entities.ActorEntity;
 import app.exceptions.ApiException;
@@ -52,52 +51,8 @@ public class ActorService extends AbstractService<ActorDTO, ActorEntity, Integer
         }
     }
 
-    // ===========================================
-    // BUSINESS-SPECIFIC METHODS (using inherited HTTP client)
-    // ===========================================
-
-    /**
-     * Search for actors by name using TMDB API
-     */
-    public List<PersonDTO> searchActorsByName(String actorName) {
-        try {
-            ResponseDTO response = searchContent(actorName, "person", ResponseDTO.class);
-
-            if (response != null && response.results() != null) {
-                // Convert MovieDTO results to PersonDTO (assuming TMDB returns person data)
-                return response.results().stream()
-                    .map(movieDto -> new PersonDTO(
-                        movieDto.getId(),
-                        movieDto.title(), // Using title as name
-                        null, null, null, null, "Acting"
-                    ))
-                    .collect(Collectors.toList());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return new ArrayList<>();
-    }
-
-    /**
-     * Get popular actors from TMDB API
-     */
-    public List<PersonDTO> getPopularActors() {
-        try {
-            ResponseDTO response = makeApiRequest("/person/popular", ResponseDTO.class);
-
-            if (response != null && response.results() != null) {
-                return response.results().stream()
-                    .map(movieDto -> new PersonDTO(
-                        movieDto.getId(),
-                        movieDto.title(),
-                        null, null, null, null, "Acting"
-                    ))
-                    .collect(Collectors.toList());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return new ArrayList<>();
+    @Override
+    public void delete(Integer integer) {
+        dao.delete(dao.findEntityById(integer));
     }
 }

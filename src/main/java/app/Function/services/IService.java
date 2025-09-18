@@ -2,6 +2,7 @@ package app.Function.services;
 
 import java.util.List;
 import java.util.Optional;
+import lombok.Data.*;
 
 /**
  * Generic Service interface that all service classes implement

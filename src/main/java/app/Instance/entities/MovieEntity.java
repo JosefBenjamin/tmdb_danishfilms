@@ -3,24 +3,20 @@ package app.Instance.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Builder
+@SuperBuilder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "movies")
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(callSuper = true)
 @ToString(exclude = {"genreEntities", "actorEntities", "directorEntity"})
-public class MovieEntity implements IEntity<Integer> {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
-    private Integer id;
+public class MovieEntity extends ResponseEntity<Integer> {
 
     private String title;
     private int releaseYear;
@@ -43,7 +39,7 @@ public class MovieEntity implements IEntity<Integer> {
     private Set<ActorEntity> actorEntities = new HashSet<>();
 
     // Many-to-One relationship with Director (Movie has one director)
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne
     @JoinColumn(name = "director_id")
     private DirectorEntity directorEntity;
 

@@ -2,23 +2,19 @@ package app.Instance.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "actors")
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(callSuper = true)
 @ToString(exclude = {"directorEntities", "movieEntities"})
-public class ActorEntity implements IEntity<Integer> {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "actor_id")
-    @EqualsAndHashCode.Include
-    private Integer id;
+public class ActorEntity extends ResponseEntity<Integer> {
 
     @Column(name = "actor_name", nullable = false, length = 255)
     private String name;
@@ -40,7 +36,6 @@ public class ActorEntity implements IEntity<Integer> {
     @ManyToMany(mappedBy = "actorEntities", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @Builder.Default
     private Set<MovieEntity> movieEntities = new HashSet<>();
-
 
     // Helper methods for bidirectional relationship management with Director
     public void addDirector(DirectorEntity directorEntity) {
