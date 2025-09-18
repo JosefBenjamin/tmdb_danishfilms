@@ -7,14 +7,18 @@ import java.util.Set;
 
 @Entity
 @Table(name = "actors")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"directors", "movies"})
 public class Actor implements BaseEntity<Integer> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "actor_id")
+    @EqualsAndHashCode.Include
     private Integer id;
 
     @Column(name = "actor_name", nullable = false, length = 255)
@@ -24,16 +28,14 @@ public class Actor implements BaseEntity<Integer> {
     private int age;
 
     // Many-to-Many relationship with Director
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-            name = "actor_director",
-            joinColumns = @JoinColumn(name = "actor_id"),
-            inverseJoinColumns = @JoinColumn(name = "director_id")
-    )
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "actor_director",
+            joinColumns = @JoinColumn(name = "actor_id"), inverseJoinColumns = @JoinColumn(name = "director_id"))
     private Set<Director> directors = new HashSet<>();
 
     // Inverse side of Many-to-Many relationship with Movie
-    @ManyToMany(mappedBy = "actors", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(mappedBy = "actors", fetch = FetchType.LAZY)
+    @Builder.Default
     private Set<Movie> movies = new HashSet<>();
 
     // Implementation of BaseEntity interface

@@ -1,10 +1,7 @@
 package app.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,13 +9,17 @@ import java.util.Set;
 @Entity
 @Builder
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @Table(name = "genres")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"movies"})
 public class Genre implements BaseEntity<Integer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Integer id;
     private String genreName;
 
