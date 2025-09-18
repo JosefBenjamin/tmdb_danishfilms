@@ -16,5 +16,9 @@ public record DirectorDTO(
 
     @JsonProperty("job")
     String job
-)
-{ }
+) implements BaseDTO<Integer> {
+    @Override
+    public Integer getId() {
+        return id;
+    }
+}

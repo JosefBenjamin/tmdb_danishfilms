@@ -12,6 +12,10 @@ public record GenreDTO(
 
     @JsonProperty("name")
     String genreName
-) {
 
+) implements BaseDTO<Integer> {
+    @Override
+    public Integer getId() {
+        return id;
+    }
 }
