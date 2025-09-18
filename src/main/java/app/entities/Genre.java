@@ -35,7 +35,7 @@ public class Genre implements BaseEntity<Integer> {
 
     @Override
     public void setId(Integer id) {
-        this.id = (Integer) id;
+        this.id = id;
     }
 
     // Helper methods for bidirectional relationship management with Movie

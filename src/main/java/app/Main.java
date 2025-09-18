@@ -4,6 +4,8 @@ import app.config.*;
 import app.entities.*;
 import app.DTO.*;
 import app.services.*;
+
+import java.util.List;
 import java.util.Map;
 
 public class Main {
@@ -55,5 +57,9 @@ public class Main {
 
         // Close EntityManagerFactory at the end
         emf.close();
+
+
+        MovieService movieService = new MovieService(emf);
+        movieService.fetchDanishMovies();
     }
 }

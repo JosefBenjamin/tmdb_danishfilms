@@ -1,12 +1,14 @@
 package app.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,7 +25,8 @@ public class Movie implements BaseEntity<Integer> {
     private Integer id;
 
     private String title;
-    private int releaseYear;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate releaseDate;
     private String originalLanguage;
 
     // Many-to-Many relationship with Genre (Movie can have multiple genres)
