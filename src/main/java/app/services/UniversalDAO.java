@@ -1,14 +1,11 @@
 package app.services;
 
 import app.DAO.IDAO;
-import app.DTO.BaseDTO;
 import app.entities.BaseEntity;
-import app.exceptions.ApiException;
 import jakarta.persistence.EntityManagerFactory;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * Universal DAO that works for ANY entity type with ZERO configuration

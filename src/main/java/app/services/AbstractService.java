@@ -1,7 +1,6 @@
 package app.services;
 
 import app.DAO.IDAO;
-import app.DTO.BaseDTO;
 import app.entities.BaseEntity;
 import app.exceptions.ApiException;
 import jakarta.persistence.EntityManagerFactory;
