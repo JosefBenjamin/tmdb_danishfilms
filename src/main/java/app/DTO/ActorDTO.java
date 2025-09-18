@@ -2,6 +2,10 @@ package app.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/*
+API reference: https://developer.themoviedb.org/reference/movie-credits
+ */
+
 public record ActorDTO(
     @JsonProperty("id")
     Integer id,
@@ -11,10 +15,5 @@ public record ActorDTO(
 
     @JsonProperty("character")
     String job
-) implements BaseDTO<Integer> {
-
-    @Override
-    public Integer getId() {
-        return id;
-    }
-}
+)
+{ }

@@ -2,10 +2,8 @@ package app.services;
 
 import app.DAO.ActorDAO;
 import app.DTO.ActorDTO;
-import app.DTO.PersonDTO;
 import app.DTO.ResponseDTO;
 import app.entities.Actor;
-import app.config.HibernateConfig;
 import app.exceptions.ApiException;
 import jakarta.persistence.EntityManagerFactory;
 
