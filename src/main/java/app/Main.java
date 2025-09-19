@@ -57,6 +57,7 @@ public class Main {
 
 
         
+
         MovieService movieService = new MovieService(emf);
 
         // step 1
@@ -77,7 +78,10 @@ public class Main {
         System.out.println("Bottom 10 movies");
         movieService.getMoviesByRating(8.5, 9.9).forEach(System.out::println);
         System.out.println("Movies rated between 8.5 and 9.9");
-        System.out.println("yo");
+
+       
+        GenreService genreService = new GenreService(emf);
+        genreService.fetchAllGenres();
 
 
         // Close EntityManagerFactory at the end

@@ -23,8 +23,11 @@ public class Genre implements BaseEntity<Integer> {
     private Integer id;
     private String genreName;
 
+    @Column(name = "tmdbId", unique = true)
+    private Integer tmdbId;
+
     // Inverse side of Many-to-Many relationship with Movie
-    @ManyToMany(mappedBy = "genres", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(mappedBy = "genres", cascade = {CascadeType.MERGE})
     @Builder.Default
     private Set<Movie> movies = new HashSet<>();
 

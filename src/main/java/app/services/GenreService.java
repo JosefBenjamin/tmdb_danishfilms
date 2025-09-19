@@ -2,11 +2,19 @@ package app.services;
 
 import app.DAO.GenreDAO;
 import app.DTO.GenreDTO;
+import app.DTO.GenreListDTO;
+import app.DTO.MovieDTO;
+import app.DTO.ResponseDTO;
 import app.entities.Genre;
+import app.entities.Movie;
 import app.exceptions.ApiException;
 import jakarta.persistence.EntityManagerFactory;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -15,6 +23,7 @@ import java.util.stream.Collectors;
 public class GenreService extends AbstractService<GenreDTO, Genre, Integer> {
 
     private final GenreDAO genreDAO;
+
 
     public GenreService(EntityManagerFactory emf) {
         super(emf, new GenreDAO(emf));
@@ -28,7 +37,7 @@ public class GenreService extends AbstractService<GenreDTO, Genre, Integer> {
     @Override
     protected GenreDTO convertToDTO(Genre genre) {
         return new GenreDTO(
-            genre.getId(),
+            genre.getTmdbId(),
             genre.getGenreName()
         );
     }
@@ -36,7 +45,7 @@ public class GenreService extends AbstractService<GenreDTO, Genre, Integer> {
     @Override
     protected Genre convertToEntity(GenreDTO dto) {
         return Genre.builder()
-            .id(dto.getId())
+            .tmdbId(dto.id())
             .genreName(dto.genreName())
             .build();
     }
@@ -134,4 +143,37 @@ public class GenreService extends AbstractService<GenreDTO, Genre, Integer> {
 
         return super.save(dto);
     }
+
+    public void fetchAllGenres() {
+            try {
+                Map<String, String> params = new HashMap<>();
+                params.put("language", "en");
+                GenreListDTO response = makeApiRequestWithParams("/genre/movie/list", params, GenreListDTO.class);
+
+                if (response != null && response.getGenres() != null) {
+                    for (Object genreObj : response.getGenres()) {
+                        try {
+                            GenreDTO genreDTO = objectMapper.convertValue(genreObj, GenreDTO.class);
+                            Optional<Genre> existingGenre = genreDAO.findByTmdbId(genreDTO.id());
+                            if (existingGenre.isEmpty()) {
+                                Genre entity = convertToEntity(genreDTO);
+                                genreDAO.persist(entity);
+                                System.out.println("Inserted new genre: " + genreDTO.genreName());
+                            } else {
+                                Genre existing = existingGenre.get();
+                                existing.setGenreName(genreDTO.genreName());
+                                genreDAO.update(existing);
+                                System.out.println("Updated existing genre: " + genreDTO.genreName());
+                            }
+                        } catch (Exception e) {
+                            System.err.println("Failed to process genre: " + e.getMessage());
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            } catch (RuntimeException e) {
+                System.err.println("Failed to process genre: " + e.getMessage());
+                throw new RuntimeException(e);
+            }
+        }
 }
