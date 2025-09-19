@@ -16,6 +16,7 @@ public class GenreService extends AbstractService<GenreDTO, Genre, Integer> {
 
     private final GenreDAO genreDAO;
 
+
     public GenreService(EntityManagerFactory emf) {
         super(emf, new GenreDAO(emf));
         this.genreDAO = (GenreDAO) dao; // Cast for additional methods

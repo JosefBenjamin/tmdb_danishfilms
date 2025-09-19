@@ -23,6 +23,7 @@ public class ActorDAO implements BaseDAO<Actor, Integer> {
         }
     }
 
+
     @Override
     public List<Actor> findAll() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -30,6 +31,7 @@ public class ActorDAO implements BaseDAO<Actor, Integer> {
             return query.getResultList();
         }
     }
+
 
     @Override
     public Actor persist(Actor entity) {
