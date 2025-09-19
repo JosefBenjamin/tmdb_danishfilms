@@ -35,7 +35,7 @@ public class Movie implements BaseEntity<Integer> {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate releaseDate;
   
-    private double rating;
+    private Double rating;
 
   @Column(name = "original_language")
     private String originalLanguage;

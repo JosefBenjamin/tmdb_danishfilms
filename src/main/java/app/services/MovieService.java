@@ -196,6 +196,7 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
                                 Movie movie = Movie.builder()
                                         .tmdbId(movieDTO.id())
                                         .title(movieDTO.title())
+                                        .rating(movieDTO.rating())
                                         .releaseDate(movieDTO.releaseDate())
                                         .originalLanguage(movieDTO.originalLanguage())
                                         .build();
