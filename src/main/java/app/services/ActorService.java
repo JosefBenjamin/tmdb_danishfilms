@@ -28,11 +28,15 @@ public class ActorService extends AbstractService<ActorDTO, Actor, Integer> {
     @Override
     public ActorDTO convertToDTO(Actor actor) {
         return new ActorDTO(
-            actor.getId(),
-            actor.getName(),
-            "Acting"
+                actor.getId(),          // id
+                actor.getName(),        // name
+                "Actor",               // character/job
+                null,                  // profilePath (we don't store this in entity)
+                null,                  // castId (we don't store this in entity)
+                0                      // order (default value)
         );
     }
+
 
     @Override
     public Actor convertToEntity(ActorDTO dto) {

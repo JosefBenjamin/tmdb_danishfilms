@@ -1,13 +1,14 @@
 package app.services;
 
 import app.DAO.MovieDAO;
-import app.DTO.MovieDTO;
-import app.DTO.ResponseDTO;
+import app.DTO.*;
 import app.entities.*;
 import app.exceptions.ApiException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.TypedQuery;
+
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,7 +36,7 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
                 .collect(Collectors.toSet());
 
         return new MovieDTO(
-                movie.getId(),
+                movie.getTmdbId(),
                 movie.getTitle(),
                 movie.getReleaseDate(),
                 movie.getRating(),
@@ -163,13 +164,13 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
      * and store/update them in the local database
      */
     public void fetchDanishMovies() {
-        int page = 1;
-        int totalPages = 1;
-        LocalDate fiveYearsAgo = LocalDate.now().minusYears(5);
-        LocalDate now = LocalDate.now();
+        try (EntityManager em = emf.createEntityManager()) {
+            int page = 1;
+            int totalPages = 1;
+            LocalDate fiveYearsAgo = LocalDate.now().minusYears(5);
+            LocalDate now = LocalDate.now();
 
-        while (page <= totalPages) {
-            try {
+            while (page <= totalPages) {
                 Map<String, String> params = new HashMap<>();
                 params.put("with_original_language", "da");
                 params.put("primary_release_date.gte", fiveYearsAgo.toString());
@@ -179,40 +180,130 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
                 ResponseDTO response = makeApiRequestWithParams("/discover/movie", params, ResponseDTO.class);
 
                 if (response != null && response.results() != null) {
-                    for (Object movieObj : response.results()) {
-                        try {
+                    em.getTransaction().begin();
+                    try {
+                        for (Object movieObj : response.results()) {
+                            // Convert Object to MovieDTO using ObjectMapper
                             MovieDTO movieDTO = objectMapper.convertValue(movieObj, MovieDTO.class);
-                            //Movie entity = convertToEntity(movieDTO);
-                            Optional<Movie> existingMovie = movieDAO.findById(movieDTO.getId());
 
-                            if (existingMovie.isEmpty()) {
-                                // Movie doesn't exist - create new one
-                                Movie entity = convertToEntity(movieDTO);
-                                movieDAO.persist(entity);
-                                System.out.println("Created new movie: " + movieDTO.title());
+                            // Try to find existing movie by TMDB ID
+                            TypedQuery<Movie> query = em.createQuery(
+                                    "SELECT m FROM Movie m WHERE m.tmdbId = :tmdbId", Movie.class);
+                            query.setParameter("tmdbId", movieDTO.id());
+                            List<Movie> existingMovies = query.getResultList();
+
+                            if (existingMovies.isEmpty()) {
+                                Movie movie = Movie.builder()
+                                        .tmdbId(movieDTO.id())
+                                        .title(movieDTO.title())
+                                        .releaseDate(movieDTO.releaseDate())
+                                        .originalLanguage(movieDTO.originalLanguage())
+                                        .build();
+                                em.persist(movie);
+                                System.out.println("Created new movie: " + movie.getTitle());
                             } else {
-                                // Movie exists - update it
-                                Movie existing = existingMovie.get();
+                                Movie existing = existingMovies.get(0);
                                 existing.setTitle(movieDTO.title());
                                 existing.setReleaseDate(movieDTO.releaseDate());
                                 existing.setRating(movieDTO.rating());
                                 existing.setOriginalLanguage(movieDTO.originalLanguage());
-
-                                movieDAO.update(existing);
-                                System.out.println("Updated existing movie: " + movieDTO.title());
+                                em.merge(existing);
+                                System.out.println("Updated existing movie: " + existing.getTitle());
                             }
-                        } catch (Exception e) {
-                            System.err.println("Failed to process movie: " + e.getMessage());
-                            throw new RuntimeException(e);
                         }
+                        em.getTransaction().commit();
+                        totalPages = response.totalPages();
+                    } catch (Exception e) {
+                        em.getTransaction().rollback();
+                        System.err.println("Failed to process page " + page + ": " + e.getMessage());
                     }
-                    totalPages = response.totalPages();
                 }
-            } catch (RuntimeException e) {
-                System.err.println("Failed to process movie: " + e.getMessage());
-                throw new RuntimeException(e);
+                page++;
             }
-            page++;
+        }
+    }
+
+    public void fetchMovieCast() {
+        try (EntityManager em = emf.createEntityManager()) {
+            List<Movie> localMovies = movieDAO.findAll();
+
+            for (Movie movie : localMovies) {
+                String endpoint = "/movie/" + movie.getTmdbId() + "/credits";
+                CreditsDTO credits = makeApiRequest(endpoint, CreditsDTO.class);
+
+                if (credits != null) {
+                    em.getTransaction().begin();
+                    try {
+                        Movie managedMovie = em.merge(movie);
+
+                        // Process actors
+                        if (credits.cast() != null) {
+                            for (ActorDTO actorDTO : credits.cast()) {
+                                TypedQuery<Actor> query = em.createQuery(
+                                        "SELECT a FROM Actor a WHERE a.tmdbId = :tmdbId", Actor.class);
+                                query.setParameter("tmdbId", actorDTO.id());
+                                List<Actor> existingActors = query.getResultList();
+
+                                Actor actor;
+                                if (existingActors.isEmpty()) {
+                                    actor = Actor.builder()
+                                            .tmdbId(actorDTO.id())
+                                            .name(actorDTO.name())
+                                            .age(0)
+                                            .build();
+                                    em.persist(actor);
+                                    System.out.println("Added new actor: " + actor.getName());
+                                } else {
+                                    actor = existingActors.get(0);
+                                    actor.setName(actorDTO.name());
+                                    actor = em.merge(actor);
+                                }
+
+                                if (!managedMovie.getActors().contains(actor)) {
+                                    managedMovie.addActor(actor);
+                                }
+                            }
+                        }
+
+                        // Process directors
+                        if (credits.crew() != null) {
+                            for (DirectorDTO directorDTO : credits.crew()) {
+                                if (isDirector(directorDTO)) {
+                                    TypedQuery<Director> query = em.createQuery(
+                                            "SELECT d FROM Director d WHERE d.tmdbId = :tmdbId", Director.class);
+                                    query.setParameter("tmdbId", directorDTO.id());
+                                    List<Director> existingDirectors = query.getResultList();
+
+                                    Director director;
+                                    if (existingDirectors.isEmpty()) {
+                                        director = Director.builder()
+                                                .tmdbId(directorDTO.id())
+                                                .name(directorDTO.name())
+                                                .job(directorDTO.job())
+                                                .build();
+                                        em.persist(director);
+                                        System.out.println("Added new director: " + director.getName());
+                                    } else {
+                                        director = existingDirectors.get(0);
+                                        director.setName(directorDTO.name());
+                                        director.setJob(directorDTO.job());
+                                        director = em.merge(director);
+                                    }
+
+                                    managedMovie.setDirector(director);
+                                }
+                            }
+                        }
+
+                        em.getTransaction().commit();
+                        System.out.println("Successfully processed cast for movie: " + movie.getTitle());
+
+                    } catch (Exception e) {
+                        em.getTransaction().rollback();
+                        System.err.println("Failed to process cast for movie " + movie.getTitle() + ": " + e.getMessage());
+                    }
+                }
+            }
         }
     }
 
@@ -273,6 +364,16 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
             em.close();
         }
     }
+
+
+    private boolean isDirector(DirectorDTO directorDTO) {
+        return directorDTO.job() != null &&
+                (directorDTO.job().equalsIgnoreCase("Director") ||
+                        directorDTO.job().contains("Director") ||
+                        directorDTO.department() != null &&
+                                directorDTO.department().equalsIgnoreCase("Directing"));
+    }
+
 
 
 }
