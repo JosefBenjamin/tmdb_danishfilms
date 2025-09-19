@@ -159,6 +159,24 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
     }
 
 
+    private void setGenresForMovie(Movie movie, Set<Integer> genreIds, EntityManager em) {
+        if (genreIds != null && !genreIds.isEmpty()) {
+            for (Integer genreId : genreIds) {
+                TypedQuery<Genre> query = em.createQuery(
+                        "SELECT g FROM Genre g WHERE g.tmdbId = :tmdbId", Genre.class);
+                query.setParameter("tmdbId", genreId);
+                List<Genre> existingGenres = query.getResultList();
+
+                if (!existingGenres.isEmpty()) {
+                    Genre genre = existingGenres.get(0);
+                    movie.addGenre(genre);
+                    System.out.println("Added genre " + genre.getGenreName() + " to movie " + movie.getTitle());
+                }
+            }
+        }
+    }
+
+
     /**
      * Fetch Danish movies released in the last 5 years from external API
      * and store/update them in the local database
@@ -183,17 +201,16 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
                     em.getTransaction().begin();
                     try {
                         for (Object movieObj : response.results()) {
-                            // Convert Object to MovieDTO using ObjectMapper
                             MovieDTO movieDTO = objectMapper.convertValue(movieObj, MovieDTO.class);
 
-                            // Try to find existing movie by TMDB ID
                             TypedQuery<Movie> query = em.createQuery(
                                     "SELECT m FROM Movie m WHERE m.tmdbId = :tmdbId", Movie.class);
                             query.setParameter("tmdbId", movieDTO.id());
                             List<Movie> existingMovies = query.getResultList();
 
+                            Movie movie;
                             if (existingMovies.isEmpty()) {
-                                Movie movie = Movie.builder()
+                                movie = Movie.builder()
                                         .tmdbId(movieDTO.id())
                                         .title(movieDTO.title())
                                         .rating(movieDTO.rating())
@@ -203,26 +220,31 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
                                 em.persist(movie);
                                 System.out.println("Created new movie: " + movie.getTitle());
                             } else {
-                                Movie existing = existingMovies.get(0);
-                                existing.setTitle(movieDTO.title());
-                                existing.setReleaseDate(movieDTO.releaseDate());
-                                existing.setRating(movieDTO.rating());
-                                existing.setOriginalLanguage(movieDTO.originalLanguage());
-                                em.merge(existing);
-                                System.out.println("Updated existing movie: " + existing.getTitle());
+                                movie = existingMovies.get(0);
+                                movie.setTitle(movieDTO.title());
+                                movie.setReleaseDate(movieDTO.releaseDate());
+                                movie.setRating(movieDTO.rating());
+                                movie.setOriginalLanguage(movieDTO.originalLanguage());
+                                movie = em.merge(movie);
+                                System.out.println("Updated existing movie: " + movie.getTitle());
                             }
+
+                            // Set genres for the movie
+                            setGenresForMovie(movie, movieDTO.genreIds(), em);
                         }
                         em.getTransaction().commit();
                         totalPages = response.totalPages();
                     } catch (Exception e) {
                         em.getTransaction().rollback();
                         System.err.println("Failed to process page " + page + ": " + e.getMessage());
+                        e.printStackTrace();
                     }
                 }
                 page++;
             }
         }
     }
+
 
     public void fetchMovieCast() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -308,6 +330,22 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
         }
     }
 
+    public void printMoviesWithGenres() {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<Movie> query = em.createQuery(
+                    "SELECT DISTINCT m FROM Movie m LEFT JOIN FETCH m.genres", Movie.class);
+            List<Movie> movies = query.getResultList();
+
+            for (Movie movie : movies) {
+                System.out.println("\nMovie: " + movie.getTitle());
+                System.out.println("Genres: " + movie.getGenres().stream()
+                        .map(Genre::getGenreName)
+                        .collect(Collectors.joining(", ")));
+            }
+        }
+    }
+
+
     /**
      * Print all movies currently in the database
      */
@@ -319,7 +357,7 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
             } else {
                 System.out.println("Movies in database:");
                 for (MovieDTO movie : movies) {
-                    System.out.printf("ID: %d | Title: %s | Release Date: %s | Rating: %d | Language: %s%n",
+                    System.out.printf("ID: %d | Title: %s | Release Date: %s | Rating: %f | Language: %s%n",
                             movie.id(),
                             movie.title(),
                             movie.releaseDate(),
@@ -329,6 +367,28 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
             }
         } catch (Exception e) {
             throw ApiException.serverError("Failed to print movies: " + e.getMessage());
+        }
+    }
+
+    public void printAllMoviesEntities(){
+        var em = emf.createEntityManager();
+        try {
+            List<Movie> movies = em.createQuery("SELECT m FROM Movie m", Movie.class).getResultList();
+            if (movies.isEmpty()) {
+                System.out.println("No movies found in the database.");
+            } else {
+                System.out.println("Movies in database:");
+                for (Movie movie : movies) {
+                    System.out.printf("ID: %d | Title: %s | Release Date: %s | Rating: %f | Language: %s%n",
+                            movie.getId(),
+                            movie.getTitle(),
+                            movie.getReleaseDate(),
+                            movie.getRating(),
+                            movie.getOriginalLanguage());
+                }
+            }
+        } finally {
+            em.close();
         }
     }
 
