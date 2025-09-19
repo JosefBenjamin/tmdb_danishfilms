@@ -21,6 +21,9 @@ public class Actor implements BaseEntity<Integer> {
     @EqualsAndHashCode.Include
     private Integer id;
 
+    @Column(name = "tmdbId", unique = true)
+    private Integer tmdbId;
+
     @Column(name = "actor_name", nullable = false, length = 255)
     private String name;
 

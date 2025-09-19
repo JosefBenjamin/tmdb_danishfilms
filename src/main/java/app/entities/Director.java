@@ -21,10 +21,17 @@ public class Director implements BaseEntity<Integer> {
     @EqualsAndHashCode.Include  // only id is used
     private Integer id;
 
+    @Column(name = "tmdbId", unique = true)
+    private Integer tmdbId;
+
     @Setter
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "age")
     private Integer age;
 
+    @Column(name = "job")
     private String job;
     @ManyToMany(mappedBy = "directors", fetch = FetchType.LAZY)
     @Builder.Default

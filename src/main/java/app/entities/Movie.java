@@ -25,9 +25,17 @@ public class Movie implements BaseEntity<Integer> {
     @EqualsAndHashCode.Include
     private Integer id;
 
+    @Column(name = "tmdbId", unique = true)
+    private Integer tmdbId;
+
+    @Column(name = "title", nullable = false)
     private String title;
+
+    @Column(name = "release_date")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate releaseDate;
+
+    @Column(name = "original_language")
     private String originalLanguage;
 
     // Many-to-Many relationship with Genre (Movie can have multiple genres)

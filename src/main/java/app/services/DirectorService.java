@@ -20,13 +20,16 @@ public class DirectorService extends AbstractService<DirectorDTO, Director, Inte
     // ===========================================
 
     @Override
-    protected DirectorDTO convertToDTO(Director director) {
+    public DirectorDTO convertToDTO(Director director) {
         return new DirectorDTO(
-            director.getId(),
-            director.getName(),
-            director.getJob() != null ? director.getJob() : "Directing"
+                director.getId(),       // id
+                director.getName(),     // name
+                director.getJob(),      // job
+                null,                  // profilePath (we don't store this in entity)
+                "Directing"            // department
         );
     }
+
 
     @Override
     protected Director convertToEntity(DirectorDTO dto) {
