@@ -7,7 +7,7 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-public class ActorDAO implements IDAO<Actor, Integer> {
+public class ActorDAO implements BaseDAO<Actor, Integer> {
 
     private final EntityManagerFactory emf;
 

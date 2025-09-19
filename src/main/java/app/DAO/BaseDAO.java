@@ -3,7 +3,7 @@ package app.DAO;
 import java.util.List;
 import java.util.Optional;
 
-public interface IDAO<T, ID> {
+public interface BaseDAO<T, ID> {
 
     Optional<T> findById(ID id);
 

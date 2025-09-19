@@ -7,7 +7,7 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-public class GenreDAO implements IDAO<Genre, Integer> {
+public class GenreDAO implements BaseDAO<Genre, Integer> {
 
     private final EntityManagerFactory emf;
 

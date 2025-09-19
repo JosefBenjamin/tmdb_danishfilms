@@ -1,9 +1,9 @@
 package app.services;
 
-import app.DAO.IDAO;
-import app.DTO.BaseDTO;
-import app.entities.BaseEntity;
-import app.exceptions.ApiException;
+import app.DAO.*;
+import app.DTO.*;
+import app.entities.*;
+import app.exceptions.*;
 import jakarta.persistence.EntityManagerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -20,19 +20,21 @@ import java.util.stream.Collectors;
  * @param <Entity> The Entity type extending BaseEntity
  * @param <ID> The ID type (Integer, Long, etc.)
  */
-public abstract class AbstractService<DTO extends BaseDTO<ID>, Entity extends BaseEntity<ID>, ID> implements IService<DTO, ID> {
+public abstract class AbstractService   <DTO    extends BaseDTO<ID>,
+                                         Entity extends BaseEntity<ID>, ID>
+        implements BaseService<DTO, ID> {
 
     // HTTP Client fields
-    private static final String API_URL = "https://api.themoviedb.org/3";
-    private final String apiKey;
-    private final ObjectMapper objectMapper;
-    private final HttpClient httpClient;
+    protected final ObjectMapper objectMapper;
+    protected final String apiKey;
+    protected final HttpClient httpClient;
+    protected final String API_URL = "https://api.themoviedb.org/3";
 
     // Core dependencies
     protected final EntityManagerFactory emf;
-    protected final IDAO<Entity, ID> dao;
+    protected final BaseDAO<Entity, ID> dao;
 
-    public AbstractService(EntityManagerFactory emf, IDAO<Entity, ID> dao) {
+    public AbstractService(EntityManagerFactory emf, BaseDAO<Entity, ID> dao) {
         this.emf = emf;
         this.dao = dao;
 

@@ -1,6 +1,5 @@
 package app.DAO;
 
-import app.DTO.MovieDTO;
 import app.entities.Movie;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -8,7 +7,7 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-public class MovieDAO implements IDAO<Movie, Integer> {
+public class MovieDAO implements BaseDAO<Movie, Integer> {
 
     private final EntityManagerFactory emf;
 

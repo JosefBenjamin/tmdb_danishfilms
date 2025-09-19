@@ -31,7 +31,7 @@ public class Movie implements BaseEntity<Integer> {
     private String originalLanguage;
 
     // Many-to-Many relationship with Genre (Movie can have multiple genres)
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "movies_and_genres",
         joinColumns = @JoinColumn(name = "movie_id"),
         inverseJoinColumns = @JoinColumn(name = "genre_id"))
@@ -39,7 +39,7 @@ public class Movie implements BaseEntity<Integer> {
     private Set<Genre> genres = new HashSet<>();
 
     // Many-to-Many relationship with Actor (Movie can have multiple actors)
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "movies_and_actors",
             joinColumns = @JoinColumn(name = "movie_id"),
             inverseJoinColumns = @JoinColumn(name = "actor_id"))
@@ -47,7 +47,7 @@ public class Movie implements BaseEntity<Integer> {
     private Set<Actor> actors = new HashSet<>();
 
     // Many-to-One relationship with Director (Movie has one director)
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "director_id")
     private Director director;
 
@@ -62,23 +62,25 @@ public class Movie implements BaseEntity<Integer> {
         this.id = id;
     }
 
-    // Helper methods for bidirectional relationship management with Genre
+    // Helper methods for bidirectional add with Genre
     public void addGenre(Genre genre) {
         this.genres.add(genre);
         genre.getMovies().add(this);
     }
 
+    // Helper methods for bidirectional remove with Genre
     public void removeGenre(Genre genre) {
         this.genres.remove(genre);
         genre.getMovies().remove(this);
     }
 
-    // Helper methods for bidirectional relationship management with Actor
+    // Helper methods for bidirectional add with Actor
     public void addActor(Actor actor) {
         this.actors.add(actor);
         actor.getMovies().add(this);
     }
 
+    // Helper methods for bidirectional remove with Actor
     public void removeActor(Actor actor) {
         this.actors.remove(actor);
         actor.getMovies().remove(this);
@@ -90,7 +92,6 @@ public class Movie implements BaseEntity<Integer> {
         if (this.director != null) {
             this.director.getMovies().remove(this);
         }
-
         this.director = director;
 
         // Add to new director if not null
