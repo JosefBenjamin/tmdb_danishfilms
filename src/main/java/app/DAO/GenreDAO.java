@@ -23,6 +23,15 @@ public class GenreDAO implements BaseDAO<Genre, Integer> {
         }
     }
 
+    public Optional<Genre> findByTmdbId(Integer tmdbId) {
+        try (EntityManager em = emf.createEntityManager()){
+            return em.createQuery("SELECT g FROM Genre g WHERE g.tmdbId = :tmdbId", Genre.class)
+                    .setParameter("tmdbId", tmdbId)
+                    .getResultStream()
+                    .findFirst();
+        }
+    }
+
     @Override
     public List<Genre> findAll() {
         try (EntityManager em = emf.createEntityManager()) {

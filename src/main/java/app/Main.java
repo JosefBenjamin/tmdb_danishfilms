@@ -57,8 +57,10 @@ public class Main {
 
 
         
-        MovieService movieService = new MovieService(emf);
-        movieService.fetchDanishMovies();
+        // MovieService movieService = new MovieService(emf);
+        // movieService.fetchDanishMovies();
+        GenreService genreService = new GenreService(emf);
+        genreService.fetchAllGenres();
 
         // Close EntityManagerFactory at the end
         emf.close();
