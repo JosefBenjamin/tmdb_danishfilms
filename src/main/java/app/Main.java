@@ -57,10 +57,32 @@ public class Main {
 
 
         
-        // MovieService movieService = new MovieService(emf);
-        // movieService.fetchDanishMovies();
+
+        MovieService movieService = new MovieService(emf);
+
+        // step 1
+        movieService.fetchDanishMovies();
+        // step 2 - Hvilken vil vi helst bruge?
+        //movieService.printAllMovies();
+        movieService.getAll().forEach(System.out::println);
+
+        // step 6
+        System.out.println(movieService.searchByTitle("Crocodile Tears"));
+
+        // step 7
+        System.out.println(movieService.getTotalAverageRating());
+        System.out.println("Total average rating");
+        movieService.getTop10ByRating().forEach(System.out::println);
+        System.out.println("Top 10 movies");
+        movieService.getBottom10ByRating().forEach(System.out::println);
+        System.out.println("Bottom 10 movies");
+        movieService.getMoviesByRating(8.5, 9.9).forEach(System.out::println);
+        System.out.println("Movies rated between 8.5 and 9.9");
+
+       
         GenreService genreService = new GenreService(emf);
         genreService.fetchAllGenres();
+
 
         // Close EntityManagerFactory at the end
         emf.close();

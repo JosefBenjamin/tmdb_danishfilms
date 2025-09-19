@@ -28,6 +28,7 @@ public class Movie implements BaseEntity<Integer> {
     private String title;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate releaseDate;
+    private double rating;
     private String originalLanguage;
 
     // Many-to-Many relationship with Genre (Movie can have multiple genres)

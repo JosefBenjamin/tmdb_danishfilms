@@ -5,6 +5,7 @@ import app.DTO.MovieDTO;
 import app.DTO.ResponseDTO;
 import app.entities.*;
 import app.exceptions.ApiException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import java.time.LocalDate;
@@ -37,6 +38,7 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
                 movie.getId(),
                 movie.getTitle(),
                 movie.getReleaseDate(),
+                movie.getRating(),
                 movie.getOriginalLanguage(),
                 genreIds
         );
@@ -48,6 +50,7 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
             Movie movie = Movie.builder()
                     .title(dto.title())
                     .releaseDate(dto.releaseDate())
+                    .rating(dto.rating())
                     .originalLanguage(dto.originalLanguage())
                     .build();
 
@@ -128,24 +131,33 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
     /**
      * Get movies by rating range from external API
      */
+
     public List<MovieDTO> getMoviesByRating(double min, double max) {
         try {
             Map<String, String> params = new HashMap<>();
             params.put("vote_average.gte", String.valueOf(min));
             params.put("vote_average.lte", String.valueOf(max));
 
-            ResponseDTO response = makeApiRequestWithParams("/discover/movie", params, ResponseDTO.class);
+            // Deserialize into ResponseDTO with raw LinkedHashMap
+            ResponseDTO<?> response = makeApiRequestWithParams("/discover/movie", params, ResponseDTO.class);
 
             if (response != null && response.results() != null) {
-                return response.results();
+                // Convert List<LinkedHashMap> to List<MovieDTO>
+                List<MovieDTO> dtos = objectMapper.convertValue(
+                        response.results(),
+                        new TypeReference<List<MovieDTO>>() {}
+                );
+                return dtos;
             } else {
-                return new ArrayList<>();
+                return Collections.emptyList();
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
     }
+
+
     /**
      * Fetch Danish movies released in the last 5 years from external API
      * and store/update them in the local database
@@ -183,6 +195,7 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
                                 Movie existing = existingMovie.get();
                                 existing.setTitle(movieDTO.title());
                                 existing.setReleaseDate(movieDTO.releaseDate());
+                                existing.setRating(movieDTO.rating());
                                 existing.setOriginalLanguage(movieDTO.originalLanguage());
 
                                 movieDAO.update(existing);
@@ -200,6 +213,64 @@ public class MovieService extends AbstractService<MovieDTO, Movie, Integer> {
                 throw new RuntimeException(e);
             }
             page++;
+        }
+    }
+
+    /**
+     * Print all movies currently in the database
+     */
+    public void printAllMovies() {
+        try {
+            List<MovieDTO> movies = getAll(); // uses AbstractService.getAll()
+            if (movies.isEmpty()) {
+                System.out.println("No movies found in the database.");
+            } else {
+                System.out.println("Movies in database:");
+                for (MovieDTO movie : movies) {
+                    System.out.printf("ID: %d | Title: %s | Release Date: %s | Rating: %d | Language: %s%n",
+                            movie.id(),
+                            movie.title(),
+                            movie.releaseDate(),
+                            movie.rating(),
+                            movie.originalLanguage());
+                }
+            }
+        } catch (Exception e) {
+            throw ApiException.serverError("Failed to print movies: " + e.getMessage());
+        }
+    }
+
+    public List<Movie> getTop10ByRating (){
+        var em = emf.createEntityManager();
+        try {
+            return em.createQuery("SELECT m FROM Movie m ORDER BY m.rating desc", Movie.class)
+                    .setMaxResults(10)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Movie> getBottom10ByRating(){
+        var em = emf.createEntityManager();
+        try {
+            return em.createQuery("SELECT m FROM Movie m ORDER BY m.rating asc", Movie.class)
+                    .setMaxResults(10)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public Double getTotalAverageRating() {
+        var em = emf.createEntityManager();
+        try {
+            Double AverageRating = em.createQuery(
+                    "SELECT AVG(m.rating) FROM Movie m", Double.class
+            ).getSingleResult();
+            return AverageRating != null ? AverageRating : 0.0;
+        } finally {
+            em.close();
         }
     }
 
