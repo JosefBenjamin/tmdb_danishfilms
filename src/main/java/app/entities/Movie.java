@@ -34,12 +34,14 @@ public class Movie implements BaseEntity<Integer> {
     @Column(name = "release_date")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate releaseDate;
+  
+    private double rating;
 
-    @Column(name = "original_language")
+  @Column(name = "original_language")
     private String originalLanguage;
 
     // Many-to-Many relationship with Genre (Movie can have multiple genres)
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(name = "movies_and_genres",
         joinColumns = @JoinColumn(name = "movie_id"),
         inverseJoinColumns = @JoinColumn(name = "genre_id"))

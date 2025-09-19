@@ -16,6 +16,9 @@ public record MovieDTO(
     @JsonProperty("release_date")
     LocalDate releaseDate,
 
+    @JsonProperty("vote_average")
+    double rating,
+
     @JsonProperty("original_language")
     String originalLanguage,
 

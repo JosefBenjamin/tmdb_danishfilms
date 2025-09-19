@@ -58,9 +58,13 @@ public class Director implements BaseEntity<Integer> {
     }
 
     public void addMovie(Movie movie) {
-        if (movie == null || movie.getDirector() == this) return;
+        if (movie == null || movie.getDirector() == this){
+            return;
+        }
         movie.setDirector(this);               // owning side is Movie.director
-        if (!movies.contains(movie)) movies.add(movie);
+        if (!movies.contains(movie)){
+            movies.add(movie);
+        }
     }
 
     public void removeMovie(Movie movie) {

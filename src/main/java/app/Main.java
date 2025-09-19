@@ -15,38 +15,50 @@ public class Main {
         var emf = HibernateConfig.getEntityManagerFactory();
 
         try {
-            // Create MovieService instance
+            // Create service instances
             MovieService movieService = new MovieService(emf);
+            ActorService actorService = new ActorService(emf);
+            GenreService genreService = new GenreService(emf);
 
-            // First fetch Danish movies
+            // Fetch initial data
+            System.out.println("\n=== Fetching Initial Data ===");
+            System.out.println("Fetching genres...");
+            genreService.fetchAllGenres();
+            
             System.out.println("Fetching Danish movies...");
             movieService.fetchDanishMovies();
-
-            // Then fetch cast information for those movies
+            
             System.out.println("Fetching cast information...");
             movieService.fetchMovieCast();
-
+            
             System.out.println("Data fetch completed!");
 
-            // Use ActorService instead of anonymous AbstractService
-            ActorService actorService = new ActorService(emf);
+            // Test Movie Service Operations
+            System.out.println("\n=== Testing MovieService Operations ===");
+            movieService.getAll().forEach(System.out::println);
+            System.out.println("\nSearching for 'Crocodile Tears':");
+            System.out.println(movieService.searchByTitle("Crocodile Tears"));
+            
+            System.out.println("\nMovies rated between 8.5 and 9.9:");
+            movieService.getMoviesByRating(8.5, 9.9).forEach(System.out::println);
 
-            // Test full CRUD operations
+            // Test Actor Service Operations
             System.out.println("\n=== Testing ActorService CRUD Operations ===");
-
-            // Save using service (now with all required parameters)
+            
+            // Create new actor via DTO
             ActorDTO newActorDTO = new ActorDTO(
-                    null,                   // id
-                    "Jane Smith",           // name
-                    "Supporting Actor",     // character/job
-                    "/profile/path.jpg",    // profilePath
-                    1,                      // castId
-                    2                       // order
+                null,                   // id
+                "Jane Smith",           // name
+                "Supporting Actor",     // character/job
+                "/profile/path.jpg",    // profilePath
+                1,                      // castId
+                2                       // order
             );
+            
             ActorDTO savedDTO = actorService.save(newActorDTO);
             System.out.println("Saved Actor via Service: " + savedDTO.name() + " with ID: " + savedDTO.getId());
 
-            // Get by ID
+            // Test retrieval
             var retrievedActor = actorService.getById(savedDTO.getId());
             if (retrievedActor.isPresent()) {
                 System.out.println("Retrieved Actor: " + retrievedActor.get().name());
@@ -58,33 +70,31 @@ public class Main {
 
             // Test direct DAO usage
             ActorDAO actorDAO = new ActorDAO(emf);
-            Actor actor = new Actor();
-            actor.setName("John Doe");
-            actor.setAge(30);
+            Actor actor = Actor.builder()
+                .name("John Doe")
+                .age(30)
+                .build();
 
             Actor savedActor = actorDAO.persist(actor);
             System.out.println("Saved Actor ID: " + savedActor.getId());
 
-            // Test service usage with proper ActorService (now with all required parameters)
+            // Test conversion
             ActorDTO test = new ActorDTO(
-                    1,                      // id
-                    "John Doe",            // name
-                    "Lead Actor",          // character/job
-                    "/profile/doe.jpg",    // profilePath
-                    2,                     // castId
-                    1                      // order
+                1,                      // id
+                "John Doe",            // name
+                "Lead Actor",          // character/job
+                "/profile/doe.jpg",    // profilePath
+                2,                     // castId
+                1                      // order
             );
 
-            // Test conversion methods
             Actor convertedActor = actorService.convertToEntity(test);
-            System.out.println("Converted Actor ID (DTO): " + test.name());
-            System.out.println("Converted Actor Name (Entity): " + convertedActor.getName());
+            System.out.println("Converted Actor: " + convertedActor.getName());
 
         } catch (Exception e) {
-            System.err.println("Error during data fetch: " + e.getMessage());
+            System.err.println("Error during execution: " + e.getMessage());
             e.printStackTrace();
         } finally {
-            // Close EntityManagerFactory at the end
             emf.close();
         }
     }
