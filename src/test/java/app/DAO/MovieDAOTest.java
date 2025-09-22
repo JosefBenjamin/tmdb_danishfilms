@@ -6,14 +6,12 @@ import app.exceptions.ApiException;
 import app.populators.MoviePopulator;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.time.LocalDate;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -77,8 +75,8 @@ class MovieDAOTest {
         }
     }
 
-    @AfterEach
-    void tearDown() {
+    @AfterAll
+    static void tearDownAll() {
         if(emf != null && emf.isOpen()) {
             emf.close();
         }
@@ -109,13 +107,78 @@ class MovieDAOTest {
 
     @Test
     void averageRatingOfAllMovies() {
+
+        //TODO: Arrange
+        Double totalAvg = movies.stream().map(movie -> movie.getRating())
+                .filter(rating -> Objects.nonNull(rating))
+                .mapToDouble(d -> d.doubleValue()).average().getAsDouble();
+
+        //TODO: Act
+        Double actual = movieDAO.averageRatingOfAllMovies();
+
+        //TODO: Assert
+        assertNotNull(actual);
+        assertNotNull(totalAvg);
+        assertEquals(totalAvg, actual);
     }
 
     @Test
     void highestRatedMovies() {
+        //TODO: Arrange
+        List<Movie> highestRated = movies.stream()
+                .filter(film ->  film.getRating() != null)
+                .sorted(Comparator.comparing((Movie m) -> m.getRating()).reversed())
+                .limit(5)
+                .toList();
+
+
+        //TODO: Act
+        List<Movie> moviesHR = movieDAO.highestRatedMovies(5);
+
+
+
+
+        //TODO: Assert
+        assertNotNull(highestRated);
+        assertNotNull(moviesHR);
+        assertEquals(5, moviesHR.size());
+        assertEquals(5, highestRated.size());
+        assertEquals(highestRated.stream().map(m -> {
+            return m.getRating();
+                }).toList(),
+                moviesHR.stream().map(m -> {
+                    return  m.getRating();
+                }).toList());
     }
 
     @Test
     void lowestRatedMovies() {
+        //TODO: Arrange
+        List<Movie> lowestRated = movies.stream()
+                .filter(film ->  film.getRating() != null)
+                .sorted(Comparator.comparing((Movie m) -> m.getRating()))
+                .limit(5)
+                .toList();
+
+
+        //TODO: Act
+        List<Movie> moviesLR = movieDAO.lowestRatedMovies(5);
+
+
+
+
+        //TODO: Assert
+        assertNotNull(lowestRated);
+        assertNotNull(moviesLR);
+        assertEquals(5, lowestRated.size());
+        assertEquals(5, moviesLR.size());
+        assertEquals(lowestRated.stream().map(m -> {
+                    return m.getRating();
+                }).toList(),
+                moviesLR.stream().map(m -> {
+                    return  m.getRating();
+                }).toList());
     }
+
+
 }
