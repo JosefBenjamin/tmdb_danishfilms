@@ -20,9 +20,8 @@ import java.util.stream.Collectors;
  * @param <Entity> The Entity type extending BaseEntity
  * @param <ID> The ID type (Integer, Long, etc.)
  */
-public abstract class AbstractService   <DTO    extends BaseDTO<ID>,
-                                         Entity extends BaseEntity<ID>, ID>
-        implements BaseService<DTO, ID> {
+public abstract class AbstractService <DTO extends BaseDTO<ID>,
+        Entity extends BaseEntity<ID>, ID> implements BaseService<DTO, ID> {
 
     // HTTP Client fields
     protected final ObjectMapper objectMapper;
@@ -103,7 +102,6 @@ public abstract class AbstractService   <DTO    extends BaseDTO<ID>,
         if (dto.getId() == null) {
             throw ApiException.badRequest("ID is required for update");
         }
-
         validateDTO(dto);
 
         // Check if entity exists

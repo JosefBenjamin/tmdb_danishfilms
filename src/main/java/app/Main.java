@@ -19,17 +19,33 @@ public class Main {
             MovieService movieService = new MovieService(emf);
             ActorService actorService = new ActorService(emf);
             GenreService genreService = new GenreService(emf);
+            MovieDAO movieDAO = new MovieDAO(emf);
+            Double averageRating = movieDAO.averageRatingOfAllMovies();
+
+            System.out.println("\n=== TOP 10 (by rating) ===");
+            movieDAO.highestRatedMovies(10).forEach(System.out::println);
+
+            System.out.println("\n=== BOTTOM 10 (by rating) ===");
+            movieDAO.lowestRatedMovies(10).forEach(System.out::println);
+
+            System.out.println("\nThis is the average rating of all movies:\n" + averageRating);
+
+
+
+
+
+            /*
 
             // Fetch initial data
             System.out.println("\n=== Fetching Initial Data ===");
             System.out.println("Fetching genres...");
-            genreService.fetchAllGenres();
+            // genreService.fetchAllGenres();
             
             System.out.println("Fetching Danish movies...");
-            movieService.fetchDanishMovies();
+            // movieService.fetchDanishMovies();
             
             System.out.println("Fetching cast information...");
-            movieService.fetchMovieCast();
+            // movieService.fetchMovieCast();
             
             System.out.println("Data fetch completed!");
 
@@ -44,8 +60,13 @@ public class Main {
 
             // Test Actor Service Operations
             System.out.println("\n=== Testing ActorService CRUD Operations ===");
+
+            // Get all actors
+            var allActors = actorService.getById(1);
+            System.out.println("Total actors in database: " + allActors.toString());
             
             // Create new actor via DTO
+            /*
             ActorDTO newActorDTO = new ActorDTO(
                 null,                   // id
                 "Jane Smith",           // name
@@ -54,6 +75,8 @@ public class Main {
                 1,                      // castId
                 2                       // order
             );
+
+
             
             ActorDTO savedDTO = actorService.save(newActorDTO);
             System.out.println("Saved Actor via Service: " + savedDTO.name() + " with ID: " + savedDTO.getId());
@@ -64,9 +87,9 @@ public class Main {
                 System.out.println("Retrieved Actor: " + retrievedActor.get().name());
             }
 
-            // Get all actors
-            var allActors = actorService.getAll();
-            System.out.println("Total actors in database: " + allActors.size());
+
+
+
 
             // Test direct DAO usage
             ActorDAO actorDAO = new ActorDAO(emf);
@@ -90,6 +113,9 @@ public class Main {
 
             Actor convertedActor = actorService.convertToEntity(test);
             System.out.println("Converted Actor: " + convertedActor.getName());
+
+             */
+
 
         } catch (Exception e) {
             System.err.println("Error during execution: " + e.getMessage());

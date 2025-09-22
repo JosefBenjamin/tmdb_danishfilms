@@ -3,14 +3,11 @@ package app.services;
 import app.DAO.GenreDAO;
 import app.DTO.GenreDTO;
 import app.DTO.GenreListDTO;
-import app.DTO.MovieDTO;
-import app.DTO.ResponseDTO;
 import app.entities.Genre;
-import app.entities.Movie;
+
 import app.exceptions.ApiException;
 import jakarta.persistence.EntityManagerFactory;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

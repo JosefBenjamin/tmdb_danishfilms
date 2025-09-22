@@ -1,11 +1,13 @@
 package app.DAO;
 
 import app.entities.Movie;
+import app.exceptions.ApiException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class MovieDAO implements BaseDAO<Movie, Integer> {
 
@@ -93,4 +95,44 @@ public class MovieDAO implements BaseDAO<Movie, Integer> {
             return query.getResultList();
         }
     }
+
+
+    public Double averageRatingOfAllMovies() {
+        try (EntityManager em = emf.createEntityManager()) {
+            Double avg = em.createQuery("SELECT avg(m.rating) from Movie m", Double.class)
+                    .getSingleResult();
+            return avg;
+         } catch (RuntimeException e) {
+            throw ApiException.notFound("No results found");
+        }
+    }
+
+
+    public List<Movie> highestRatedMovies(int numberOfMovies) {
+        try (EntityManager em = emf.createEntityManager()) {
+            List<Movie> movies = em.createQuery("SELECT m " + "FROM Movie m " +
+                    "WHERE m.rating IS NOT NULL " +
+                    "ORDER BY m.rating DESC nulls last ", Movie.class)
+                    .setMaxResults(numberOfMovies)
+                    .getResultList();
+            return  movies;
+        } catch (RuntimeException e) {
+            throw ApiException.badRequest("Use an int to pick movies amount");
+        }
+    }
+
+
+    public List<Movie> lowestRatedMovies(int numberOfMovies) {
+        try (EntityManager em = emf.createEntityManager()) {
+            List<Movie> movies = em.createQuery("SELECT m " + "FROM Movie m " +
+                            "WHERE m.rating IS NOT NULL " +
+                            "ORDER BY m.rating ASC NULLS LAST ", Movie.class)
+                    .setMaxResults(numberOfMovies)
+                    .getResultList();
+            return movies;
+        } catch (RuntimeException e) {
+            throw ApiException.notFound("No results found");
+        }
+    }
+
 }

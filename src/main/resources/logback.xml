@@ -1,0 +1,20 @@
+<configuration>
+    <!-- Console appender -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Silence Hibernate noise -->
+    <logger name="org.hibernate" level="WARN"/>
+    <logger name="org.hibernate.SQL" level="OFF"/>           <!-- hide SQL lines -->
+    <logger name="org.hibernate.type.descriptor.sql" level="WARN"/>
+    <logger name="org.hibernate.ormbytecode" level="WARN"/>
+    <logger name="org.jboss.logging" level="WARN"/>
+
+    <!-- Your app logs -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>
